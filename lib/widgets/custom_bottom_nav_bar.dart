@@ -14,12 +14,11 @@ class CustomBottomNavBar extends StatelessWidget {
         items: const <Widget>[
           Icon(Icons.add, size: 20),
           Icon(Icons.list, size: 20),
+          Icon(Icons.ac_unit, size: 20),
           Icon(Icons.compare_arrows, size: 20),
           Icon(Icons.usb_rounded, size: 20),
         ],
-        onTap: (index) {
-          
-        },
+        onTap: (index) {},
       ),
     );
   }
