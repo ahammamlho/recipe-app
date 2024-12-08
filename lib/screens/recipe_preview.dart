@@ -71,9 +71,41 @@ class _RecipePreviewState extends State<RecipePreview> {
                     "based on 23 reviews",
                     style: TextStyle(fontSize: 20),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   _buildRatingSummarySection(width),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 40,
+                      width: width * 0.6,
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 0.2),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(5),
+                        ),
+                        // color: Colors.grey[300],
+                      ),
+                      child: const Center(
+                          child: Text(
+                        "Write a review",
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold),
+                      )),
+                    ),
+                  ),
                 ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 10, right: 10),
+              child: const Divider(
+                color: Colors.grey,
+                thickness: 0.5,
+                indent: 20,
+                endIndent: 20,
               ),
             ),
           ],
