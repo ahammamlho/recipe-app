@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:recipe/widgets/custom_bottom_nav_bar.dart';
+import 'package:recipe/widgets/time_line_widget.dart';
 
 class RecipePreview extends StatefulWidget {
   const RecipePreview({super.key});
@@ -14,7 +16,6 @@ class _RecipePreviewState extends State<RecipePreview> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
-    // Ingredients and Directions
     List<String> ingredients = [
       "1/4 olive oil",
       "3 cloves",
@@ -40,8 +41,41 @@ class _RecipePreviewState extends State<RecipePreview> {
             _buildImageSection(width),
             _buildSectionTitle("Ingredients"),
             _buildIngredientsList(ingredients),
-            _buildSectionTitle("Directions"),
-            _buildDirectionsList(directions),
+            _buildSectionTitle("Steps"),
+            TimeLineWidget(
+              steps: directions,
+              isCheckedList: List.generate(directions.length, (index) => false),
+            ),
+            _buildSectionTitle("Reviews"),
+            Center(
+              child: Column(
+                children: [
+                  const Text(
+                    "4.0",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  RatingStars(
+                    value: 3,
+                    onValueChanged: (v) {},
+                    starCount: 5,
+                    starSize: 25,
+                    starSpacing: 2,
+                    maxValue: 5,
+                    valueLabelVisibility: false,
+                    starOffColor: const Color(0xffe7e8ea),
+                    starColor: Colors.yellow[700]!,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "based on 23 reviews",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildRatingSummarySection(width),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -49,9 +83,70 @@ class _RecipePreviewState extends State<RecipePreview> {
     );
   }
 
-  // Image Section
-  Widget _buildImageSection(double width) {
+  Widget _buildRatingSummarySection(double width) {
     return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: Column(
+        children: [
+          _buildRatingSummary("Excellent", 0.9, Colors.green, width),
+          _buildRatingSummary("Good", 0.5, Colors.green[300]!, width),
+          _buildRatingSummary("Average", 0.7, Colors.yellow, width),
+          _buildRatingSummary("Below Average", 0.3, Colors.orange, width),
+          _buildRatingSummary("Poor", 0.1, Colors.red, width),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingSummary(
+      String title, double percentage, Color color, double width) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: width * 0.28,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Container(
+            height: 10,
+            width: width * 0.6,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(5),
+              ),
+              color: Colors.grey[300],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  height: 10,
+                  width: width * 0.6 * percentage,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageSection(double width) {
+    return SizedBox(
       height: width * 0.6,
       child: Stack(
         alignment: AlignmentDirectional.center,
@@ -177,7 +272,6 @@ class _RecipePreviewState extends State<RecipePreview> {
     );
   }
 
-  // Ingredients Section
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, top: 20),
@@ -205,41 +299,6 @@ class _RecipePreviewState extends State<RecipePreview> {
               ),
               title: Text(
                 ingredient,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildDirectionsList(List<String> directions) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: directions.asMap().entries.map((entry) {
-          int index = entry.key; // Index
-          String direction = entry.value; // Direction text
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(right: 20, top: 5),
-            child: ListTile(
-              titleAlignment: ListTileTitleAlignment.top,
-              leading: CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.green,
-                child: Text(
-                  (index + 1).toString(),
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-              title: Text(
-                direction,
                 style: const TextStyle(fontSize: 16),
               ),
             ),
