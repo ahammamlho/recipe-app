@@ -20,25 +20,24 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 5, right: 20),
-      child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.steps.length,
-              itemBuilder: (context, index) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      widget.isCheckedList[index] =
-                          !widget.isCheckedList[index];
-                    });
-                  },
-                  child: CustomTimeLineWidget(
-                      isCheckedList: widget.isCheckedList,
-                      index: index,
-                      steps: widget.steps)))
-          .animate(delay: 1000.ms)
-          .fadeIn(delay: (500).ms)
-          .slideY(begin: 0.2, end: 0),
-    );
+        padding: const EdgeInsets.only(left: 5, right: 20),
+        child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.steps.length,
+            itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  setState(() {
+                    widget.isCheckedList[index] = !widget.isCheckedList[index];
+                  });
+                },
+                child: CustomTimeLineWidget(
+                    isCheckedList: widget.isCheckedList,
+                    index: index,
+                    steps: widget.steps)))
+        // .animate(delay: 1000.ms)
+        // .fadeIn(delay: (500).ms)
+        // .slideY(begin: 0.2, end: 0),
+        );
   }
 }
 
@@ -110,7 +109,7 @@ class CustomTimeLineWidget extends StatelessWidget {
             ),
           ],
         )
-            .animate(delay: 1200.ms)
+            .animate(delay: 200.ms)
             .fadeIn(delay: (350 * index).ms)
             .slideY(begin: 0.3, end: 0),
       ),

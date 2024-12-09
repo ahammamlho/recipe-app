@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
-import 'package:recipe/widgets/custom_bottom_nav_bar.dart';
+import 'package:recipe/widgets/expandable_text.dart';
 import 'package:recipe/widgets/time_line_widget.dart';
 
 class RecipePreview extends StatefulWidget {
@@ -47,60 +47,16 @@ class _RecipePreviewState extends State<RecipePreview> {
               isCheckedList: List.generate(directions.length, (index) => false),
             ),
             _buildSectionTitle("Reviews"),
-            Center(
-              child: Column(
-                children: [
-                  const Text(
-                    "4.0",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  RatingStars(
-                    value: 3,
-                    onValueChanged: (v) {},
-                    starCount: 5,
-                    starSize: 25,
-                    starSpacing: 2,
-                    maxValue: 5,
-                    valueLabelVisibility: false,
-                    starOffColor: const Color(0xffe7e8ea),
-                    starColor: Colors.yellow[700]!,
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "based on 23 reviews",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildRatingSummarySection(width),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      height: 40,
-                      width: width * 0.6,
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 0.2),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(5),
-                        ),
-                        // color: Colors.grey[300],
-                      ),
-                      child: const Center(
-                          child: Text(
-                        "Write a review",
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold),
-                      )),
-                    ),
-                  ),
-                ],
-              ),
+            _buildReviewsSection(width),
+            const Divider(
+              color: Colors.grey,
+              thickness: 0.5,
+              indent: 20,
+              endIndent: 20,
             ),
+            _buildLeaveReview(width),
             Container(
-              padding: const EdgeInsets.only(top: 10, right: 10),
+              padding: const EdgeInsets.only(top: 20),
               child: const Divider(
                 color: Colors.grey,
                 thickness: 0.5,
@@ -108,10 +64,123 @@ class _RecipePreviewState extends State<RecipePreview> {
                 endIndent: 20,
               ),
             ),
+            _buildUserReviewSection(width),
+            _buildUserReviewSection(width),
+            const SizedBox(height: 100),
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
+    );
+  }
+
+  Widget _buildReviewsSection(double width) {
+    return Center(
+      child: Column(
+        children: [
+          const Text(
+            "4.0",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          RatingStars(
+            value: 3,
+            onValueChanged: (v) {},
+            starCount: 5,
+            starSize: 25,
+            starSpacing: 2,
+            maxValue: 5,
+            valueLabelVisibility: false,
+            starOffColor: const Color(0xffe7e8ea),
+            starColor: Colors.yellow[700]!,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "based on 23 reviews",
+            style: TextStyle(fontSize: 20),
+          ),
+          const SizedBox(height: 10),
+          _buildRatingSummarySection(width),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeaveReview(double width) {
+    late double value = 4;
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Leave a Review",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          RatingStars(
+            value: value,
+            onValueChanged: (v) {
+              setState(() {
+                value = v;
+              });
+            },
+            starCount: 5,
+            starSize: 25,
+            starSpacing: 10,
+            maxValue: 5,
+            valueLabelVisibility: false,
+            starOffColor: const Color(0xffe7e8ea),
+            starColor: Colors.yellow[700]!,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: TextField(
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    labelText: "Comment",
+                    hintText: "Type something...",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(width: 1), // Border thickness
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Colors.grey, width: 1),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.attach_file, color: Colors.grey),
+                      onPressed: () {},
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(100),
+                    ),
+                    color: Colors.blue,
+                  ),
+                  child: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 30,
+                      )))
+            ],
+          )
+        ],
+      ),
     );
   }
 
@@ -336,6 +405,76 @@ class _RecipePreviewState extends State<RecipePreview> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildUserReviewSection(double width) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: CachedNetworkImage(
+                  imageUrl:
+                      "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
+                  width: 45,
+                  height: 45,
+                  fit: BoxFit.cover,
+                  progressIndicatorBuilder: (context, url, progress) =>
+                      const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Hello word",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  Row(
+                    children: [
+                      RatingStars(
+                        value: 3,
+                        onValueChanged: (v) {},
+                        starCount: 5,
+                        starSize: 18,
+                        starSpacing: 2,
+                        maxValue: 5,
+                        valueLabelVisibility: false,
+                        starOffColor: const Color(0xffe7e8ea),
+                        starColor: Colors.yellow[700]!,
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "5.0",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Spacer(),
+              Text(
+                "1 day ago",
+                style: TextStyle(color: Colors.grey[800]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const ExpandableTextWidget(
+            text:
+                "This is a long text example to demonstrate the show more and show less functionality in Flutter. This feature is particularly useful for displaying large blocks of text in a limited space. Tap on 'Show more' to see the full content.",
+          ),
+        ],
       ),
     );
   }
