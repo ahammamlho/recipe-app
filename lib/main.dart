@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:recipe/screens/page_home.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:recipe/screens/start_page.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(
+      const GetMaterialApp(
+        home: MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -17,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const PageHome(),
+      home: StartPage(),
     );
   }
 }

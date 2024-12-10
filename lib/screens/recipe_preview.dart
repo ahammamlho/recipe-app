@@ -46,6 +46,12 @@ class _RecipePreviewState extends State<RecipePreview> {
               steps: directions,
               isCheckedList: List.generate(directions.length, (index) => false),
             ),
+            const Divider(
+              color: Colors.grey,
+              thickness: 0.5,
+              indent: 20,
+              endIndent: 20,
+            ),
             _buildSectionTitle("Reviews"),
             _buildReviewsSection(width),
             const Divider(

@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
+import 'package:get/get.dart';
 import 'package:recipe/screens/recipe_preview.dart';
-import 'package:recipe/widgets/custom_bottom_nav_bar.dart';
 
 class PageHome extends StatefulWidget {
   const PageHome({super.key});
@@ -57,7 +57,6 @@ class _PageHomeState extends State<PageHome> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 
@@ -143,12 +142,7 @@ class _PageHomeState extends State<PageHome> {
   Widget _buildImage(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const RecipePreview(),
-          ),
-        );
+        Get.to(const RecipePreview());
       },
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
