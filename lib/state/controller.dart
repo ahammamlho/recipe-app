@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:recipe/screens/add_recipce.dart';
+import 'package:recipe/screens/add_recipe.dart';
 import 'package:recipe/screens/page_home.dart';
 
 class MyController extends GetxController {
@@ -8,7 +8,7 @@ class MyController extends GetxController {
   void changeIndex(int i) {
     index = i;
     if (index == 0) {
-      Get.off(const AddRecipce());
+      Get.off(const AddRecipe());
     }
     if (index == 2) {
       Get.off(const PageHome());

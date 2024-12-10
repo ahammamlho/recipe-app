@@ -1,6 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:recipe/screens/add_recipce.dart';
+import 'package:recipe/screens/add_recipe.dart';
 import 'package:recipe/screens/page_home.dart';
 
 class StartPage extends StatefulWidget {
@@ -12,7 +12,7 @@ class _StartPageState extends State<StartPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const AddRecipce(),
+    const AddRecipe(),
     const Center(child: Text("favorite Page", style: TextStyle(fontSize: 24))),
     const PageHome(),
     const Center(
