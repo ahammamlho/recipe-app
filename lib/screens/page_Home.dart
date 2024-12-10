@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
 import 'package:recipe/screens/recipe_preview.dart';
+import 'package:recipe/widgets/search_bar.dart';
 
 class PageHome extends StatefulWidget {
   const PageHome({super.key});
@@ -26,33 +27,45 @@ class _PageHomeState extends State<PageHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 100),
+      appBar: AppBar(),
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            // Search Bar (Uncomment if needed)
-            // CustomSearchBar(
-            //   controller: _searchController,
-            //   hintText: "Search recipes...",
-            //   onSearch: _onSearch,
-            // ),
-            Expanded(
-              child: Card(
-                elevation: 8.0,
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(12.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1, // Single column layout
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1.15, // Square items
-                  ),
-                  itemCount: items.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _buildRecipeCard(context);
-                  },
+            Container(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: _buildHelloUser()),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: const Text(
+                'What would you like to cook today?',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+            const SizedBox(height: 10),
+            CustomSearchBar(
+              controller: _searchController,
+              hintText: "Search recipes",
+              onSearch: _onSearch,
+            ),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(12.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1, // Single column layout
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.15, // Square items
+              ),
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildRecipeCard(context);
+              },
             ),
           ],
         ),
@@ -105,36 +118,59 @@ class _PageHomeState extends State<PageHome> {
     );
   }
 
+  Widget _buildHelloUser() {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: CachedNetworkImage(
+            imageUrl:
+                "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            progressIndicatorBuilder: (context, url, progress) =>
+                const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            errorWidget: (context, url, error) => const Icon(Icons.error),
+          ),
+        ),
+        const SizedBox(width: 10),
+        const Text(
+          "Hello, Ali",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+      ],
+    );
+  }
+
   Widget _buildContent(BuildContext context) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              offset: const Offset(0, 2),
-              blurRadius: 10,
-              spreadRadius: 1,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildImage(context),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.only(left: 5),
+            child: Text(
+              "Hello word",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImage(context),
-            const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.only(left: 5),
-              child: Text(
-                "Hello word",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-              ),
-            ),
-            _buildFooter(),
-          ],
-        ),
+          ),
+          _buildFooter(),
+        ],
       ),
     );
   }
