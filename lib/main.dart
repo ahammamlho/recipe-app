@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:recipe/screens/auth_screen.dart';
 import 'package:recipe/screens/start_page.dart';
 
 void main() => runApp(
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: StartPage(),
+      home: const AuthScreen(),
     );
   }
 }
