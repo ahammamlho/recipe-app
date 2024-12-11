@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
+import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/widgets/expandable_text.dart';
 import 'package:recipe/widgets/time_line_widget.dart';
 
@@ -85,7 +86,7 @@ class _RecipePreviewState extends State<RecipePreview> {
         children: [
           const Text(
             "4.0",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: AppTextStyles.heading,
           ),
           const SizedBox(height: 10),
           RatingStars(
@@ -102,7 +103,7 @@ class _RecipePreviewState extends State<RecipePreview> {
           const SizedBox(height: 10),
           const Text(
             "based on 23 reviews",
-            style: TextStyle(fontSize: 20),
+            style: AppTextStyles.headingNormal,
           ),
           const SizedBox(height: 10),
           _buildRatingSummarySection(width),
@@ -121,7 +122,7 @@ class _RecipePreviewState extends State<RecipePreview> {
         children: [
           const Text(
             "Leave a Review",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: AppTextStyles.heading,
           ),
           const SizedBox(height: 5),
           RatingStars(
@@ -151,17 +152,18 @@ class _RecipePreviewState extends State<RecipePreview> {
                     labelText: "Comment",
                     hintText: "Type something...",
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius:
+                          BorderRadius.circular(AppSizes.borderRadiusPrimary),
                       borderSide:
                           const BorderSide(width: 1), // Border thickness
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: Colors.grey, width: 1),
+                          const BorderSide(color: AppColors.border, width: 1),
                     ),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.attach_file, color: Colors.grey),
+                      icon: Icon(Icons.attach_file, color: AppColors.iconColor),
                       onPressed: () {},
                     ),
                   ),
@@ -174,7 +176,7 @@ class _RecipePreviewState extends State<RecipePreview> {
                     borderRadius: BorderRadius.all(
                       Radius.circular(100),
                     ),
-                    color: Colors.blue,
+                    color: AppColors.primary,
                   ),
                   child: IconButton(
                       onPressed: () {},
@@ -305,23 +307,16 @@ class _RecipePreviewState extends State<RecipePreview> {
       child: Container(
         height: 60,
         width: width * 0.8,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10),
             topRight: Radius.circular(10),
           ),
-          color: Colors.blueAccent.shade700,
+          color: AppColors.primary,
         ),
         child: const Center(
-          child: Text(
-            "Delicious Tart Recipe",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 25,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: Text("Delicious Tart Recipe",
+              textAlign: TextAlign.center, style: AppTextStyles.headingWhite),
         ),
       ),
     );
@@ -335,10 +330,10 @@ class _RecipePreviewState extends State<RecipePreview> {
         width: width * 0.8,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10),
+            bottomLeft: Radius.circular(AppSizes.borderRadiusPrimary),
+            bottomRight: Radius.circular(AppSizes.borderRadiusPrimary),
           ),
-          color: Colors.white,
+          color: AppColors.background,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -365,7 +360,7 @@ class _RecipePreviewState extends State<RecipePreview> {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 20),
+          Icon(icon, color: iconColor, size: AppSizes.iconSize),
           const SizedBox(width: 5),
           Text(
             text,
@@ -384,7 +379,7 @@ class _RecipePreviewState extends State<RecipePreview> {
       padding: const EdgeInsets.only(left: 20, top: 20),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: AppTextStyles.heading,
       ),
     );
   }
@@ -401,12 +396,12 @@ class _RecipePreviewState extends State<RecipePreview> {
             child: ListTile(
               leading: const Icon(
                 Icons.add_box_rounded,
-                color: Colors.green,
-                size: 30,
+                color: AppColors.button,
+                size: AppSizes.iconSize,
               ),
               title: Text(
                 ingredient,
-                style: const TextStyle(fontSize: 16),
+                style: AppTextStyles.body,
               ),
             ),
           );
@@ -437,13 +432,13 @@ class _RecipePreviewState extends State<RecipePreview> {
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: AppSizes.spaceBetweenWidget),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     "Hello word",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    style: AppTextStyles.body,
                   ),
                   Row(
                     children: [
@@ -461,8 +456,7 @@ class _RecipePreviewState extends State<RecipePreview> {
                       const SizedBox(width: 10),
                       const Text(
                         "5.0",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
+                        style: AppTextStyles.body,
                       ),
                     ],
                   ),

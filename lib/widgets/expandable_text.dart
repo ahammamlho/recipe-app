@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe/const/app_styles.dart';
 
 class ExpandableTextWidget extends StatefulWidget {
   final String text;
@@ -17,7 +18,6 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Measure if the text overflows 3 lines
         final TextPainter textPainter = TextPainter(
           text: TextSpan(
             text: widget.text,
@@ -34,10 +34,10 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
           children: [
             Text(
               widget.text,
-              maxLines: isExpanded ? null : 3, // Expand or collapse
+              maxLines: isExpanded ? null : 3,
               overflow:
                   isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 16),
+              style: AppTextStyles.body,
             ),
             if (isOverflowing)
               GestureDetector(
@@ -49,7 +49,6 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
                 child: Text(
                   isExpanded ? "Show less" : "Show more",
                   style: const TextStyle(
-                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

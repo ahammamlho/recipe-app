@@ -1,14 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:recipe/const/app_styles.dart';
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _SignInScreenState extends State<SignInScreen> {
   bool isPasswordVisible = false;
 
   @override
@@ -31,40 +32,30 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Container(
                 height: height * 0.75,
                 padding: const EdgeInsets.only(left: 20, right: 20),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(AppSizes.borderRadiusSecondary),
+                    topRight: Radius.circular(AppSizes.borderRadiusSecondary),
                   ),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, -4),
-                    ),
-                  ],
+                  color: AppColors.background,
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    // crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       const Text(
                         "Sign in Your Account",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.heading,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       _buildInputField(
                         label: "Enter Your Email",
                         icon: Icons.email,
                         isPassword: false,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       _buildInputField(
                         label: "Enter Your Password",
                         icon: Icons.lock,
@@ -82,26 +73,22 @@ class _AuthScreenState extends State<AuthScreen> {
                           padding: EdgeInsets.only(top: 10),
                           child: Text(
                             "Forget Password?",
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.textSign,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       _buildSignInButton(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       const Center(child: Text("Or Sign in with")),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       _buildSocialMediaButtons(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       const Divider(
                         color: Colors.grey,
                         thickness: 0.5,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget),
                       _buildSignUpPrompt(),
                     ],
                   ),
@@ -120,10 +107,6 @@ class _AuthScreenState extends State<AuthScreen> {
         height: height * 0.3,
         width: width,
         child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
           child: CachedNetworkImage(
             imageUrl:
                 "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
@@ -148,14 +131,18 @@ class _AuthScreenState extends State<AuthScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.inputColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(width: 0.4),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[600]),
+          Icon(
+            icon,
+            color: AppColors.iconColor,
+            size: AppSizes.iconSize,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -169,7 +156,8 @@ class _AuthScreenState extends State<AuthScreen> {
                           isPasswordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          size: 20,
+                          size: AppSizes.iconSize,
+                          color: AppColors.iconColor,
                         ),
                         onPressed: onVisibilityToggle,
                       )
@@ -186,16 +174,13 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       height: 45,
       decoration: BoxDecoration(
-        color: Colors.green,
+        color: AppColors.button,
         borderRadius: BorderRadius.circular(10),
       ),
       child: const Center(
         child: Text(
           'Sign In',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-          ),
+          style: AppTextStyles.button,
         ),
       ),
     );
@@ -206,9 +191,9 @@ class _AuthScreenState extends State<AuthScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildSocialButton("assets/auth/apple.png"),
-        const SizedBox(width: 20),
+        const SizedBox(width: AppSizes.spaceBetweenWidget),
         _buildSocialButton("assets/auth/google.png"),
-        const SizedBox(width: 20),
+        const SizedBox(width: AppSizes.spaceBetweenWidget),
         _buildSocialButton("assets/auth/facebook.png"),
       ],
     );
@@ -219,7 +204,7 @@ class _AuthScreenState extends State<AuthScreen> {
       height: 40,
       width: 40,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[50],
         borderRadius: BorderRadius.circular(5),
         border: Border.all(color: Colors.grey, width: 0.5),
       ),
@@ -236,11 +221,7 @@ class _AuthScreenState extends State<AuthScreen> {
         SizedBox(width: 10),
         Text(
           "Sign up",
-          style: TextStyle(
-            color: Colors.orange,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.textSign,
         ),
       ],
     );

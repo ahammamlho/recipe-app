@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
+import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/screens/recipe_preview.dart';
 import 'package:recipe/widgets/search_bar.dart';
 
@@ -34,15 +35,16 @@ class _PageHomeState extends State<PageHome> {
             Container(
                 padding: const EdgeInsets.only(left: 10, right: 10),
                 child: _buildHelloUser()),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spaceBetweenWidget),
             Container(
               padding: const EdgeInsets.only(left: 10, right: 10),
-              child: const Text(
-                'What would you like to cook today?',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: const Row(
+                children: [
+                  Text(
+                    'What would you like to cook today?',
+                    style: AppTextStyles.heading,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 10),
@@ -51,16 +53,16 @@ class _PageHomeState extends State<PageHome> {
               hintText: "Search recipes",
               onSearch: _onSearch,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSizes.spaceBetweenWidget),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(12.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, // Single column layout
+                crossAxisCount: 1,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 1.15, // Square items
+                childAspectRatio: 1.15,
               ),
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {
@@ -74,15 +76,12 @@ class _PageHomeState extends State<PageHome> {
   }
 
   Widget _buildRecipeCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 8),
-          _buildContent(context),
-        ],
-      ),
+    return Column(
+      children: [
+        _buildHeader(),
+        const SizedBox(height: 8),
+        _buildContent(context),
+      ],
     );
   }
 
@@ -109,11 +108,14 @@ class _PageHomeState extends State<PageHome> {
             const SizedBox(width: 10),
             const Text(
               "Hello word",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              style: AppTextStyles.body,
             ),
           ],
         ),
-        const Icon(Icons.more_horiz),
+        const Icon(
+          Icons.more_horiz,
+          size: AppSizes.iconSize,
+        ),
       ],
     );
   }
@@ -137,7 +139,7 @@ class _PageHomeState extends State<PageHome> {
         const SizedBox(width: 10),
         const Text(
           "Hello, Ali",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: AppTextStyles.heading2,
         ),
       ],
     );
@@ -166,7 +168,7 @@ class _PageHomeState extends State<PageHome> {
             padding: EdgeInsets.only(left: 5),
             child: Text(
               "Hello word",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              style: AppTextStyles.heading2,
             ),
           ),
           _buildFooter(),
@@ -205,15 +207,16 @@ class _PageHomeState extends State<PageHome> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.favorite, color: Colors.red, size: 20),
+          const Icon(Icons.favorite,
+              color: Colors.red, size: AppSizes.iconSize),
           const SizedBox(width: 5),
-          const Text("12", style: TextStyle(fontSize: 16)),
+          const Text("12", style: AppTextStyles.body),
           const SizedBox(width: 10),
           RatingStars(
             value: 3,
             onValueChanged: (v) {},
             starCount: 5,
-            starSize: 16,
+            starSize: 18,
             starSpacing: 2,
             maxValue: 5,
             valueLabelVisibility: false,
@@ -221,11 +224,12 @@ class _PageHomeState extends State<PageHome> {
             starColor: Colors.yellow,
           ),
           const SizedBox(width: 5),
-          const Text("12 Reviews", style: TextStyle(fontSize: 16)),
+          const Text("12 Reviews", style: AppTextStyles.body),
           const Spacer(),
-          const Icon(Icons.timer_outlined, color: Colors.green, size: 20),
+          const Icon(Icons.timer_outlined,
+              color: Colors.green, size: AppSizes.iconSize),
           const SizedBox(width: 5),
-          const Text("60min", style: TextStyle(fontSize: 16)),
+          const Text("60min", style: AppTextStyles.body),
         ],
       ),
     );

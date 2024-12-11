@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:recipe/const/app_colors.dart';
+import 'package:recipe/const/app_styles.dart';
 import 'package:timelines/timelines.dart';
 
 class TimeLineWidget extends StatefulWidget {
@@ -57,11 +57,11 @@ class CustomTimeLineWidget extends StatelessWidget {
     const dashedLine = DashedLineConnector(
       gap: 5,
       dash: 6,
-      color: AppColors.timeLineColor,
+      color: AppColors.button,
     );
     const dotIndicator = DotIndicator(
       size: 25,
-      color: AppColors.timeLineColor,
+      color: AppColors.button,
       child: Icon(
         Icons.check,
         size: 15,
@@ -70,7 +70,7 @@ class CustomTimeLineWidget extends StatelessWidget {
     );
     const outLinedIndicator = OutlinedDotIndicator(
       size: 25,
-      color: AppColors.timeLineColor,
+      color: AppColors.button,
     );
     return SizedBox(
         child: TimelineTile(
@@ -80,14 +80,14 @@ class CustomTimeLineWidget extends StatelessWidget {
               ? null
               : isCheckedList[index]
                   ? const SolidLineConnector(
-                      color: AppColors.timeLineColor,
+                      color: AppColors.button,
                     )
                   : dashedLine,
           endConnector: index == steps.length - 1
               ? null
               : isCheckedList[index]
                   ? const SolidLineConnector(
-                      color: AppColors.timeLineColor,
+                      color: AppColors.button,
                     )
                   : dashedLine,
           indicator: isCheckedList[index] ? dotIndicator : outLinedIndicator),
@@ -98,14 +98,14 @@ class CustomTimeLineWidget extends StatelessWidget {
           children: [
             Text(
               "Step ${index + 1}",
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: AppTextStyles.setps,
             ),
             const SizedBox(
               height: 10,
             ),
             Text(
               steps[index],
-              style: const TextStyle(fontSize: 16),
+              style: AppTextStyles.body,
             ),
           ],
         )
