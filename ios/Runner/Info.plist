@@ -45,5 +45,19 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.571358523842-aoti0581oslkjk9p9525ke1kfsbdg07s</string>
+				<string>com.recipewithlina.community</string>
+			</array>
+		</dict>
+	</array>
+
 </dict>
 </plist>

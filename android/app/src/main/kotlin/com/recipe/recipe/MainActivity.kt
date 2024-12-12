@@ -1,4 +1,4 @@
-package com.recipe.recipe
+package com.recipewithlina.community
 
 import io.flutter.embedding.android.FlutterActivity
 

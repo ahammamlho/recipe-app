@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:recipe/auth/auth_service.dart';
 import 'package:recipe/const/app_styles.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -10,7 +11,7 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  bool isPasswordVisible = false;
+  final authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +26,12 @@ class _SignInScreenState extends State<SignInScreen> {
             // Foreground Card
             _buildHeaderImage(height, width),
             Positioned(
-              top: height * 0.25,
+              top: height * 0.45,
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                height: height * 0.75,
+                height: height * 0.5,
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(
@@ -41,7 +42,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: AppSizes.spaceBetweenWidget),
                       const Text(
@@ -49,39 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         textAlign: TextAlign.center,
                         style: AppTextStyles.heading,
                       ),
-                      const SizedBox(height: AppSizes.spaceBetweenWidget),
-                      _buildInputField(
-                        label: "Enter Your Email",
-                        icon: Icons.email,
-                        isPassword: false,
-                      ),
-                      const SizedBox(height: AppSizes.spaceBetweenWidget),
-                      _buildInputField(
-                        label: "Enter Your Password",
-                        icon: Icons.lock,
-                        isPassword: true,
-                        onVisibilityToggle: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                        isPasswordVisible: isPasswordVisible,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Text(
-                            "Forget Password?",
-                            style: AppTextStyles.textSign,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.spaceBetweenWidget),
-                      _buildSignInButton(),
-                      const SizedBox(height: AppSizes.spaceBetweenWidget),
-                      const Center(child: Text("Or Sign in with")),
-                      const SizedBox(height: AppSizes.spaceBetweenWidget),
+                      const SizedBox(height: AppSizes.spaceBetweenWidget * 2),
                       _buildSocialMediaButtons(),
                       const SizedBox(height: AppSizes.spaceBetweenWidget),
                       const Divider(
@@ -104,7 +74,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _buildHeaderImage(double height, double width) {
     return Positioned(
       child: SizedBox(
-        height: height * 0.3,
+        height: height * 0.5,
         width: width,
         child: ClipRRect(
           child: CachedNetworkImage(
@@ -122,94 +92,43 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildInputField({
-    required String label,
-    required IconData icon,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onVisibilityToggle,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.inputColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(width: 0.4),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: AppColors.iconColor,
-            size: AppSizes.iconSize,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              obscureText: isPassword && !isPasswordVisible,
-              decoration: InputDecoration(
-                hintText: label,
-                border: InputBorder.none,
-                suffixIcon: isPassword
-                    ? IconButton(
-                        icon: Icon(
-                          isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          size: AppSizes.iconSize,
-                          color: AppColors.iconColor,
-                        ),
-                        onPressed: onVisibilityToggle,
-                      )
-                    : null,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSignInButton() {
-    return Container(
-      height: 45,
-      decoration: BoxDecoration(
-        color: AppColors.button,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Center(
-        child: Text(
-          'Sign In',
-          style: AppTextStyles.button,
-        ),
-      ),
-    );
-  }
-
   Widget _buildSocialMediaButtons() {
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildSocialButton("assets/auth/apple.png"),
+        _buildSocialButton("assets/auth/apple.png", "Apple"),
         const SizedBox(width: AppSizes.spaceBetweenWidget),
-        _buildSocialButton("assets/auth/google.png"),
-        const SizedBox(width: AppSizes.spaceBetweenWidget),
-        _buildSocialButton("assets/auth/facebook.png"),
+        _buildSocialButton("assets/auth/google.png", 'Google'),
+        // const SizedBox(width: AppSizes.spaceBetweenWidget),
+        // _buildSocialButton("assets/auth/facebook.png", 'Facebook'),
       ],
     );
   }
 
-  Widget _buildSocialButton(String assetPath) {
-    return Container(
-      height: 40,
-      width: 40,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: Colors.grey, width: 0.5),
+  Widget _buildSocialButton(String assetPath, String title) {
+    return GestureDetector(
+      onTap: () {
+        if (title == 'Google') authService.googleSignIn();
+        if (title == 'Apple') authService.appleSignIn();
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: AppColors.inputColor,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: Colors.grey, width: 0.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Image.asset(assetPath, height: 30),
+            SizedBox(
+                width: 200,
+                child: Text("Continue with $title", style: AppTextStyles.body))
+          ],
+        ),
       ),
-      padding: const EdgeInsets.all(5),
-      child: Image.asset(assetPath),
     );
   }
 
@@ -220,7 +139,7 @@ class _SignInScreenState extends State<SignInScreen> {
         Text("Don't have an account?"),
         SizedBox(width: 10),
         Text(
-          "Sign up",
+          "Skip",
           style: AppTextStyles.textSign,
         ),
       ],

@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:recipe/screens/page_Home.dart';
-import 'package:recipe/screens/sign_in_screen.dart';
-import 'package:recipe/screens/start_page.dart';
+import 'package:recipe/auth/auth_gate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() => runApp(
-      const GetMaterialApp(
-        home: MyApp(),
-      ),
-    );
+void main() async {
+  await dotenv.load(fileName: ".env");
+  await Supabase.initialize(
+    anonKey: dotenv.env['SUPABASE_KEY'] as String,
+    url: dotenv.env['SUPABASE_URL'] as String,
+  );
+
+  runApp(
+    const GetMaterialApp(
+      home: MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -22,7 +30,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const PageHome(),
+      home: const AuthGate(),
     );
   }
 }
