@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe/screens/add_recipe.dart';
 import 'package:recipe/screens/page_home.dart';
+import 'package:recipe/screens/profile_screen.dart';
 
 class StartPage extends StatefulWidget {
   @override
@@ -17,7 +18,7 @@ class _StartPageState extends State<StartPage> {
     const PageHome(),
     const Center(
         child: Text("notifications Page", style: TextStyle(fontSize: 24))),
-    const Center(child: Text("Profile Page", style: TextStyle(fontSize: 24))),
+    const ProfileScreen(),
   ];
 
   @override

@@ -17,11 +17,11 @@ class PageHome extends StatefulWidget {
 class _PageHomeState extends State<PageHome> {
   final authService = AuthService();
   final TextEditingController _searchController = TextEditingController();
-  String _searchText = "";
+  // String _searchText = "";
 
   void _onSearch(String value) {
     setState(() {
-      _searchText = value;
+      // _searchText = value;
     });
   }
 
@@ -75,7 +75,7 @@ class _PageHomeState extends State<PageHome> {
                 crossAxisCount: 1,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 1.15,
+                childAspectRatio: 1.14,
               ),
               itemCount: items.length,
               itemBuilder: (BuildContext context, int index) {

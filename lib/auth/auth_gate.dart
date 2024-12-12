@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recipe/screens/page_home.dart';
 import 'package:recipe/screens/sign_in_screen.dart';
 import 'package:recipe/screens/start_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,6 +20,8 @@ class AuthGate extends StatelessWidget {
           }
 
           final session = snapshot.hasData ? snapshot.data!.session : null;
+
+          print(session);
 
           if (session != null) {
             return StartPage();

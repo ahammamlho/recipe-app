@@ -39,6 +39,10 @@ class AppTextStyles {
     fontSize: 16,
     color: AppColors.text,
   );
+  static const TextStyle bodyWhite = TextStyle(
+    fontSize: 16,
+    color: Colors.white,
+  );
 
   static const TextStyle setps = TextStyle(
     fontSize: 18,
