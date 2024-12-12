@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
+import 'package:recipe/screens/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -177,27 +179,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildActionButton(
       double width, String label, Color backgroundColor, Color textColor) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: label == "Edit Profile"
-            ? const BorderRadius.only(
-                topRight: Radius.circular(10),
-                bottomRight: Radius.circular(10),
-              )
-            : const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                bottomLeft: Radius.circular(10),
-              ),
-        color: backgroundColor,
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            color: textColor,
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => const EditProfileScreen());
+      },
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: label == "Edit Profile"
+              ? const BorderRadius.only(
+                  topRight: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                )
+              : const BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                ),
+          color: backgroundColor,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              color: textColor,
+            ),
           ),
         ),
       ),
