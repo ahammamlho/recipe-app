@@ -46,15 +46,20 @@ class UserDTO {
   }
 
   // Method to convert a UserDTO to JSON
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     'uuid': uuid,
-  //     'fullName': fullName,
-  //     'email': email,
-  //     'avatar_url': avatarUrl,
-  //     'socialMediaUrl': socialMediaUrl,
-  //     'bio': bio,
-  //     'score': score,
-  //   };
-  // }
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': uuid,
+      'full_name': fullName,
+      'user_name': userName,
+      'email': email,
+      'avatar_url': avatarUrl,
+      'social_media_link': socialMediaUrl,
+      'bio': bio,
+      'score': score,
+      "number_followers": numberFollowers,
+      "number_recipes": numberRecipes,
+      "views_profile": viewsProfile,
+      "status": status,
+    };
+  }
 }

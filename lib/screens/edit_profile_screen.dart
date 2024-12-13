@@ -1,15 +1,41 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
+import 'package:recipe/data/user_service.dart';
+import 'package:recipe/dto/user_dto.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  final UserDTO user;
+  const EditProfileScreen({super.key, required this.user});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  final userService = UserService();
+
+  TextEditingController _userNameController = TextEditingController();
+  TextEditingController _linkontroller = TextEditingController();
+  TextEditingController _bioController = TextEditingController();
+
+  late UserDTO updateDataUser;
+
+  bool isUserNameValid = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _userNameController = TextEditingController(text: widget.user.userName);
+    _linkontroller = TextEditingController(text: widget.user.socialMediaUrl);
+    _bioController = TextEditingController(text: widget.user.bio);
+
+    setState(() {
+      updateDataUser = widget.user;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -18,15 +44,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Edit Profile'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back(result: updateDataUser);
+          },
+        ),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 20),
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue),
+            child: GestureDetector(
+              onTap: () async {
+                setState(() {
+                  isUserNameValid = isValidUserName(_userNameController.text);
+                });
+                if (isUserNameValid) {
+                  updateDataUser = UserDTO.fromJson({
+                    ...(updateDataUser.toJson()),
+                    "user_name": _userNameController.text,
+                    "bio": _bioController.text,
+                    "social_media_link": _linkontroller.text,
+                  });
+                  await userService.updateUserData(updateDataUser);
+                }
+              },
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue),
+              ),
             ),
           ),
         ],
@@ -126,8 +174,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SizedBox(
           width: width - 40,
           child: TextField(
+            controller:
+                label == "Username" ? _userNameController : _linkontroller,
             decoration: InputDecoration(
               hintText: hint,
+              errorText: label == "Username" && !isUserNameValid
+                  ? "Use 1-12 characters (letters, numbers, _ or -)"
+                  : null,
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: isUserNameValid ? Colors.grey : Colors.red,
+                  width: 2,
+                ),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(width: 1),
@@ -155,7 +215,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SizedBox(
           width: width - 40,
           child: TextField(
+            controller: _bioController,
             maxLines: 4,
+            maxLength: 200,
             decoration: InputDecoration(
               hintText: "Write a short bio about yourself",
               border: OutlineInputBorder(
@@ -176,5 +238,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ],
     );
+  }
+
+  bool isValidUserName(String userName) {
+    final RegExp validPattern = RegExp(r'^[a-zA-Z0-9_-]{5,12}$');
+    return validPattern.hasMatch(userName);
   }
 }

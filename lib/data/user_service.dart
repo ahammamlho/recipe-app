@@ -31,4 +31,21 @@ class UserService {
       return null;
     }
   }
+
+  Future<void> updateUserData(UserDTO updateData) async {
+    try {
+      final response = await _supabase
+          .from('user')
+          .update(updateData.toJson())
+          .eq('uuid', updateData.uuid)
+          .select();
+
+      if (response.isEmpty) {
+        print("No matching user found to update.");
+        return;
+      }
+    } catch (e) {
+      print("Exception occurred during user update: $e");
+    }
+  }
 }

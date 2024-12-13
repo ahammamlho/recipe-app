@@ -15,12 +15,13 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final userService = UserService();
+
   late UserDTO userData;
   bool loading = true;
 
   @override
   void initState() {
-    super.initState();
+    super.didChangeDependencies();
     getDataUser();
   }
 
@@ -62,11 +63,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    _buildProfileHeader(userData),
+                    _buildProfileHeader(),
                     const SizedBox(height: 20),
-                    _buildBioSection(userData),
+                    _buildBioSection(),
                     const SizedBox(height: 20),
-                    _buildStatsSection(userData),
+                    _buildStatsSection(),
                     const SizedBox(height: 20),
                     _buildActionButtons(width),
                   ],
@@ -77,17 +78,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(UserDTO user) {
+  Widget _buildProfileHeader() {
     return Row(
       children: [
-        _buildProfilePicture(user),
+        _buildProfilePicture(),
         const SizedBox(width: 10),
-        _buildProfileInfo(user),
+        _buildProfileInfo(),
       ],
     );
   }
 
-  Widget _buildProfilePicture(UserDTO user) {
+  Widget _buildProfilePicture() {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -107,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(100),
         child: CachedNetworkImage(
-          imageUrl: user.avatarUrl,
+          imageUrl: userData.avatarUrl,
           width: 75,
           height: 75,
           fit: BoxFit.cover,
@@ -121,21 +122,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo(UserDTO user) {
+  Widget _buildProfileInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          user.userName,
+          userData.userName,
           style: AppTextStyles.heading2,
         ),
         Text(
-          user.status,
+          userData.status,
           style: AppTextStyles.body,
         ),
-        user.socialMediaUrl != ""
+        userData.socialMediaUrl != ""
             ? Text(
-                user.socialMediaUrl,
+                userData.socialMediaUrl,
                 style: const TextStyle(
                   color: Colors.blue,
                 ),
@@ -145,17 +146,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBioSection(UserDTO user) {
-    return user.bio != ""
-        ? Text(
-            user.bio,
-            style: AppTextStyles.body,
-            textAlign: TextAlign.center,
+  Widget _buildBioSection() {
+    return userData.bio != ""
+        ? Row(
+            children: [
+              Text(
+                userData.bio,
+                style: AppTextStyles.body,
+                textAlign: TextAlign.start,
+              ),
+            ],
           )
         : Container();
   }
 
-  Widget _buildStatsSection(UserDTO user) {
+  Widget _buildStatsSection() {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -173,9 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStatItem(user.numberRecipes, "Recipes"),
-          _buildStatItem(user.viewsProfile, "Views"),
-          _buildStatItem(user.numberFollowers, "Followers"),
+          _buildStatItem(userData.numberRecipes, "Recipes"),
+          _buildStatItem(userData.viewsProfile, "Views"),
+          _buildStatItem(userData.numberFollowers, "Followers"),
         ],
       ),
     );
@@ -205,8 +210,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildActionButton(width * 0.5 - 20, "My Recipes", AppColors.button,
             Colors.white, () {}),
         _buildActionButton(
-            width * 0.5 - 20, "Edit Profile", Colors.white, Colors.black, () {
-          Get.to(() => const EditProfileScreen());
+            width * 0.5 - 20, "Edit Profile", Colors.white, Colors.black,
+            () async {
+          final updatedUser =
+              await Get.to(() => EditProfileScreen(user: userData));
+          if (updatedUser != null) {
+            setState(() {
+              userData = updatedUser;
+            });
+          }
         }),
       ],
     );
