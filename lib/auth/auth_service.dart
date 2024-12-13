@@ -30,7 +30,7 @@ class AuthService {
         throw 'No ID Token found.';
       }
       UserDTO userData = UserDTO(
-        id: '',
+        uuid: '',
         fullName: googleUser.displayName == null
             ? " "
             : googleUser.displayName as String,
@@ -38,7 +38,13 @@ class AuthService {
         avatarUrl:
             googleUser.photoUrl == null ? "" : googleUser.photoUrl as String,
         socialMediaUrl: '',
+        userName: "",
         score: 0,
+        bio: "",
+        numberFollowers: 0,
+        numberRecipes: 0,
+        viewsProfile: 0,
+        status: "",
       );
       await addUserIfNotExist(userData);
       return _supabase.auth.signInWithIdToken(
@@ -78,17 +84,21 @@ class AuthService {
       String familyName = credential.familyName == null ? "" : "";
       String givenName = credential.givenName == null ? "" : "";
       UserDTO userData = UserDTO(
-        id: '',
-        fullName: "$familyName $givenName",
-        email: result.session!.user.email == null
-            ? ""
-            : result.session!.user.email as String,
-        avatarUrl: "",
-        socialMediaUrl: '',
-        score: 0,
-      );
+          uuid: '',
+          fullName: "$familyName $givenName",
+          email: result.session!.user.email == null
+              ? ""
+              : result.session!.user.email as String,
+          avatarUrl: "",
+          userName: "",
+          socialMediaUrl: '',
+          score: 0,
+          bio: "",
+          numberFollowers: 0,
+          numberRecipes: 0,
+          viewsProfile: 0,
+          status: "");
       await addUserIfNotExist(userData);
-      print(userData.toJson());
       return result;
     } catch (e) {
       return null;
@@ -99,12 +109,6 @@ class AuthService {
     await _supabase.auth.signOut();
   }
 
-  String? getCurrentUserEmail() {
-    final session = _supabase.auth.currentSession;
-    final user = session?.user;
-    return user?.email;
-  }
-
   Future<void> addUserIfNotExist(UserDTO user) async {
     try {
       final existingUser =
@@ -113,10 +117,16 @@ class AuthService {
         await _supabase.from('user').insert({
           'email': user.email,
           'full_name': user.fullName,
+          'social_media_link': "",
+          'bio': "",
           'avatar_url': user.avatarUrl,
           'user_name': user.fullName.split(' ')[0] == ""
               ? generateRandomUsername()
               : user.fullName.split(' ')[0],
+          "number_followers": 0,
+          "number_recipes": 0,
+          "views_profile": 0,
+          "status": "New member",
         });
       }
     } catch (error) {

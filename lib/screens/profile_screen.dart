@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
+import 'package:recipe/data/user_service.dart';
+import 'package:recipe/dto/user_dto.dart';
 import 'package:recipe/screens/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -12,6 +14,38 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final userService = UserService();
+  late UserDTO userData;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getDataUser();
+  }
+
+  Future<void> getDataUser() async {
+    try {
+      UserDTO? data = await userService.getCurrentUserData();
+      if (data == null) {
+        setState(() {
+          loading = false;
+        });
+        return;
+      }
+      setState(() {
+        userData = data;
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+      print("Error fetching user data: $e");
+      // Optionally show a SnackBar or an AlertDialog
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -21,37 +55,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text("Profile"),
         elevation: 1,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              _buildProfileHeader(),
-              const SizedBox(height: 20),
-              _buildBioSection(),
-              const SizedBox(height: 20),
-              _buildStatsSection(),
-              const SizedBox(height: 20),
-              _buildActionButtons(width),
-            ],
-          ),
-        ),
-      ),
+      body: !loading
+          ? SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildProfileHeader(userData),
+                    const SizedBox(height: 20),
+                    _buildBioSection(userData),
+                    const SizedBox(height: 20),
+                    _buildStatsSection(userData),
+                    const SizedBox(height: 20),
+                    _buildActionButtons(width),
+                  ],
+                ),
+              ),
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(UserDTO user) {
     return Row(
       children: [
-        _buildProfilePicture(),
+        _buildProfilePicture(user),
         const SizedBox(width: 10),
-        _buildProfileInfo(),
+        _buildProfileInfo(user),
       ],
     );
   }
 
-  Widget _buildProfilePicture() {
+  Widget _buildProfilePicture(UserDTO user) {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -71,8 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(100),
         child: CachedNetworkImage(
-          imageUrl:
-              "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
+          imageUrl: user.avatarUrl,
           width: 75,
           height: 75,
           fit: BoxFit.cover,
@@ -86,37 +121,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo() {
-    return const Column(
+  Widget _buildProfileInfo(UserDTO user) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "_diamoris",
+          user.userName,
           style: AppTextStyles.heading2,
         ),
         Text(
-          "new member",
+          user.status,
           style: AppTextStyles.body,
         ),
-        Text(
-          "instagram.com/_diamoris/",
-          style: TextStyle(
-            color: Colors.blue,
-          ),
-        ),
+        user.socialMediaUrl != ""
+            ? Text(
+                user.socialMediaUrl,
+                style: const TextStyle(
+                  color: Colors.blue,
+                ),
+              )
+            : const SizedBox(),
       ],
     );
   }
 
-  Widget _buildBioSection() {
-    return const Text(
-      "A passionate recipe developer blending traditional techniques with modern flavors.",
-      style: AppTextStyles.body,
-      textAlign: TextAlign.center,
-    );
+  Widget _buildBioSection(UserDTO user) {
+    return user.bio != ""
+        ? Text(
+            user.bio,
+            style: AppTextStyles.body,
+            textAlign: TextAlign.center,
+          )
+        : Container();
   }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(UserDTO user) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -134,20 +173,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStatItem("353", "Recipes"),
-          _buildStatItem("124", "Views"),
-          _buildStatItem("1.5K", "Followers"),
+          _buildStatItem(user.numberRecipes, "Recipes"),
+          _buildStatItem(user.viewsProfile, "Views"),
+          _buildStatItem(user.numberFollowers, "Followers"),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatItem(int value, String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          value,
+          "$value",
           style: AppTextStyles.heading2,
         ),
         Text(
@@ -158,31 +197,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildActionButtons(double width) {
+  Widget _buildActionButtons(
+    double width,
+  ) {
     return Row(
       children: [
+        _buildActionButton(width * 0.5 - 20, "My Recipes", AppColors.button,
+            Colors.white, () {}),
         _buildActionButton(
-          width * 0.5 - 20,
-          "My Recipes",
-          AppColors.button,
-          Colors.white,
-        ),
-        _buildActionButton(
-          width * 0.5 - 20,
-          "Edit Profile",
-          Colors.white,
-          Colors.black,
-        ),
+            width * 0.5 - 20, "Edit Profile", Colors.white, Colors.black, () {
+          Get.to(() => const EditProfileScreen());
+        }),
       ],
     );
   }
 
   Widget _buildActionButton(
-      double width, String label, Color backgroundColor, Color textColor) {
+    double width,
+    String label,
+    Color backgroundColor,
+    Color textColor,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
-      onTap: () {
-        Get.to(() => const EditProfileScreen());
-      },
+      onTap: onTap,
       child: Container(
         width: width,
         padding: const EdgeInsets.all(10),
