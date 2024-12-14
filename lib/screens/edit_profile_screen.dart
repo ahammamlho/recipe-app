@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recipe/const/app_styles.dart';
-import 'package:recipe/data/upload_image_service.dart';
-import 'package:recipe/data/user_service.dart';
+import 'package:recipe/services/upload_image_service.dart';
+import 'package:recipe/services/user_service.dart';
 import 'package:recipe/dto/user_dto.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final uploadImageService = UploadImageService();
 
   TextEditingController _userNameController = TextEditingController();
-  TextEditingController _linkontroller = TextEditingController();
+  TextEditingController _linkController = TextEditingController();
   TextEditingController _bioController = TextEditingController();
 
   late UserDTO updateDataUser;
@@ -37,7 +37,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _userNameController = TextEditingController(text: widget.user.userName);
-    _linkontroller = TextEditingController(text: widget.user.socialMediaUrl);
+    _linkController = TextEditingController(text: widget.user.socialMediaUrl);
     _bioController = TextEditingController(text: widget.user.bio);
 
     updateDataUser = widget.user;
@@ -80,7 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ...(updateDataUser.toJson()),
                     "user_name": _userNameController.text,
                     "bio": _bioController.text,
-                    "social_media_link": _linkontroller.text,
+                    "social_media_link": _linkController.text,
                     "avatar_url": _imageFile != null && urlImage != null
                         ? "$urlImage?time${DateTime.now().millisecondsSinceEpoch}"
                         : updateDataUser.avatarUrl,
@@ -208,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           width: width - 40,
           child: TextField(
             controller:
-                label == "Username" ? _userNameController : _linkontroller,
+                label == "Username" ? _userNameController : _linkController,
             onChanged: (_) {
               setState(() {
                 isMadeChange = true;

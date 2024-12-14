@@ -7,7 +7,7 @@ class UserService {
   Future<UserDTO?> getCurrentUserData() async {
     final session = _supabase.auth.currentSession;
 
-    if (session == null || session.user == null) {
+    if (session == null) {
       print("No active session or user found.");
       return null;
     }

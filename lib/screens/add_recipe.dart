@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/state/controller.dart';
 
 class AddRecipe extends StatefulWidget {
   const AddRecipe({super.key});
@@ -8,8 +11,17 @@ class AddRecipe extends StatefulWidget {
 }
 
 class _AddRecipeState extends State<AddRecipe> {
+  final MyController myController = Get.find<MyController>();
+
   final List<String> ingredients = [""];
   final List<String> preparations = [""];
+  final List<String> tags = [];
+  TextEditingController tagController = TextEditingController();
+
+  TextEditingController titleController = TextEditingController();
+
+  double selectedMinutes = 15.0;
+  double _selectedMinutes = 15.0;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +31,7 @@ class _AddRecipeState extends State<AddRecipe> {
       appBar: AppBar(
         title: const Text("Upload Recipe"),
         backgroundColor: Colors.blueAccent,
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.abc))],
       ),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -54,7 +67,9 @@ class _AddRecipeState extends State<AddRecipe> {
                 (index) => preparations.removeAt(index),
                 () => preparations.add(""),
               ),
+              _buildSectionTitle("Tags"),
               const SizedBox(height: 20),
+              _buildTagsList(width),
               _buildActionButtons(width),
               const SizedBox(height: 20),
             ],
@@ -86,6 +101,7 @@ class _AddRecipeState extends State<AddRecipe> {
 
   Widget _buildTitleField() {
     return TextField(
+      controller: titleController,
       decoration: InputDecoration(
         labelText: "Title",
         hintText: "Choose Title of your recipe",
@@ -102,34 +118,44 @@ class _AddRecipeState extends State<AddRecipe> {
   }
 
   Widget _buildPreparationTime() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Preparation Time',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(
-          width: 120,
-          height: 40,
-          child: TextField(
-            keyboardType: TextInputType.number, // Ensures only numeric input
-            decoration: InputDecoration(
-              labelText: "Timer",
-              hintText: "in minutes",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(width: 1),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.grey, width: 1),
-              ),
-            ),
-          ),
+        const SizedBox(height: 20),
+        Slider(
+          min: 15.0,
+          max: 240.0,
+          divisions: 15,
+          value: _selectedMinutes,
+          label: _formatTime(_selectedMinutes),
+          onChanged: (value) {
+            setState(() {
+              _selectedMinutes = value;
+            });
+          },
+          activeColor: Colors.blue,
+          inactiveColor: Colors.grey[300],
         ),
       ],
     );
+  }
+
+  String _formatTime(double minutes) {
+    int hours = minutes ~/ 60;
+    int mins = (minutes % 60).toInt();
+    if (hours > 0) {
+      if (mins == 0) {
+        return '${hours}h';
+      } else {
+        return '${hours}h ${mins}m';
+      }
+    } else {
+      return '${mins}m';
+    }
   }
 
   Widget _buildSectionTitle(String title) {
@@ -226,6 +252,110 @@ class _AddRecipeState extends State<AddRecipe> {
     );
   }
 
+  Widget _buildTagsList(
+    double width,
+  ) {
+    return Column(
+      children: [
+        tags != null
+            ? Wrap(
+                crossAxisAlignment: WrapCrossAlignment.start,
+                runAlignment: WrapAlignment.start,
+                alignment: WrapAlignment.start,
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: tags.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  String value = entry.value;
+                  return Container(
+                    height: 35,
+                    padding: const EdgeInsets.only(left: 15, right: 0),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(100),
+                      ),
+                      color: Colors.blue,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          value,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                tags.removeAt(index);
+                              });
+                            },
+                            icon: const Icon(Icons.cancel,
+                                size: 16, color: Colors.red))
+                      ],
+                    ),
+                  );
+                }).toList(),
+              )
+            : Container(),
+        const SizedBox(height: 10),
+        Container(
+          margin: const EdgeInsets.only(top: 10),
+          child: TextField(
+            controller: tagController,
+            onChanged: (newValue) {},
+            maxLines: 1,
+            decoration: InputDecoration(
+              labelText: "tag ${tags.length + 1}",
+              hintText: "Ex #recipce",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
+              ),
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (tagController.text != "") {
+                    tags.add(tagController.text);
+                    tagController = TextEditingController(text: "");
+                  }
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.only(top: 20),
+                height: 30,
+                width: 80,
+                decoration: BoxDecoration(
+                  border: Border.all(width: 0.5),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add),
+                    SizedBox(width: 5),
+                    Text("Add"),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons(double width) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -237,21 +367,43 @@ class _AddRecipeState extends State<AddRecipe> {
   }
 
   Widget _buildActionButton(String text, Color color, double width) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      height: 40,
-      width: width,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(
-              fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+    return GestureDetector(
+      onTap: () {
+        final recipeData = RecipceDto(
+          uuid: "",
+          uuidUser: myController.uuidUser,
+          titleRecipe: titleController.text,
+          ingredients: trimList(ingredients),
+          steps: trimList(preparations),
+          recipeUrl: '',
+          timer: _selectedMinutes,
+          numberLikes: 0,
+          tags: trimList(tags),
+        );
+        print(recipeData.toJson());
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 20),
+        height: 40,
+        width: width,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(
+                fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
+  }
+
+  List<String> trimList(List<String> strings) {
+    List<String> cleanedList =
+        strings.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    return cleanedList;
   }
 }

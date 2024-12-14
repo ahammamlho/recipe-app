@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:recipe/dto/user_dto.dart';
+import 'package:recipe/state/controller.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:crypto/crypto.dart';
@@ -11,6 +13,8 @@ import 'dart:math';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  final MyController myController = Get.put(MyController());
 
   Future<AuthResponse?> googleSignIn() async {
     try {
@@ -113,8 +117,9 @@ class AuthService {
     try {
       final existingUser =
           await _supabase.from('user').select().eq('email', user.email);
+
       if (existingUser.isEmpty) {
-        await _supabase.from('user').insert({
+        final resp = await _supabase.from('user').insert({
           'email': user.email,
           'full_name': user.fullName,
           'social_media_link': "",
@@ -127,7 +132,10 @@ class AuthService {
           "number_recipes": 0,
           "views_profile": 0,
           "status": "New member",
-        });
+        }).select();
+        myController.changeUuidUser(resp[0]["uuid"]);
+      } else {
+        myController.changeUuidUser(existingUser[0]["uuid"]);
       }
     } catch (error) {
       print(error);

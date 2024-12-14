@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
-import 'package:recipe/data/user_service.dart';
+import 'package:recipe/services/user_service.dart';
 import 'package:recipe/dto/user_dto.dart';
 import 'package:recipe/screens/edit_profile_screen.dart';
 
@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    super.didChangeDependencies();
+    super.initState();
     getDataUser();
   }
 
