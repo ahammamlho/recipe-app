@@ -4,7 +4,7 @@ import 'package:recipe/const/app_styles.dart';
 import 'package:timelines/timelines.dart';
 
 class TimeLineWidget extends StatefulWidget {
-  final List<String> steps;
+  final List<dynamic> steps;
   List<bool> isCheckedList;
   TimeLineWidget({
     super.key,
@@ -22,6 +22,7 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
     return Container(
         padding: const EdgeInsets.only(left: 5, right: 20),
         child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 0),
             shrinkWrap: true,
             itemCount: widget.steps.length,
             itemBuilder: (context, index) => GestureDetector(
@@ -44,7 +45,7 @@ class _TimeLineWidgetState extends State<TimeLineWidget> {
 class CustomTimeLineWidget extends StatelessWidget {
   final List<bool> isCheckedList;
   final int index;
-  final List<String> steps;
+  final List<dynamic> steps;
   const CustomTimeLineWidget({
     Key? key,
     required this.isCheckedList,
@@ -72,8 +73,7 @@ class CustomTimeLineWidget extends StatelessWidget {
       size: 25,
       color: AppColors.button,
     );
-    return SizedBox(
-        child: TimelineTile(
+    return TimelineTile(
       node: TimelineNode(
           indicatorPosition: 0.1,
           startConnector: index == 0
@@ -114,6 +114,6 @@ class CustomTimeLineWidget extends StatelessWidget {
             .slideY(begin: 0.3, end: 0),
       ),
       nodePosition: 0.03,
-    ));
+    );
   }
 }

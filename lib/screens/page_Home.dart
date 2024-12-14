@@ -193,7 +193,7 @@ class _PageHomeState extends State<PageHome> {
   Widget _buildImage(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(const RecipePreview());
+        // Get.to(const RecipePreview());
       },
       child: ClipRRect(
         borderRadius: const BorderRadius.only(

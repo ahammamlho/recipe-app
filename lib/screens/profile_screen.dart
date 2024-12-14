@@ -4,6 +4,7 @@ import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/screens/recipe_preview.dart';
 import 'package:recipe/services/recipe_service.dart';
 import 'package:recipe/services/user_service.dart';
 import 'package:recipe/dto/user_dto.dart';
@@ -136,10 +137,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildImage(BuildContext context, RecipceDto recipce) {
+  Widget _buildImage(BuildContext context, RecipceDto recipe) {
     return GestureDetector(
       onTap: () {
-        // Get.to(const RecipePreview());
+        Get.to(RecipePreview(recipe: recipe));
       },
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -147,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           topRight: Radius.circular(10),
         ),
         child: CachedNetworkImage(
-          imageUrl: recipce.recipeUrl,
+          imageUrl: recipe.recipeUrl,
           width: double.infinity,
           height: 200,
           fit: BoxFit.cover,

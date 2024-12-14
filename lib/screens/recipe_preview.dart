@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:recipe/const/app_styles.dart';
+import 'package:recipe/dto/recipce_dto.dart';
 import 'package:recipe/widgets/expandable_text.dart';
 import 'package:recipe/widgets/time_line_widget.dart';
 
 class RecipePreview extends StatefulWidget {
-  const RecipePreview({super.key});
+  final RecipceDto recipe;
+  const RecipePreview({super.key, required this.recipe});
 
   @override
   State<RecipePreview> createState() => _RecipePreviewState();
@@ -44,9 +46,12 @@ class _RecipePreviewState extends State<RecipePreview> {
             _buildIngredientsList(ingredients),
             _buildSectionTitle("Steps"),
             TimeLineWidget(
-              steps: directions,
+              steps: widget.recipe.steps,
               isCheckedList: List.generate(directions.length, (index) => false),
             ),
+            _buildSectionTitle("Tags"),
+            _buildTagsSection(),
+            const SizedBox(height: 10),
             const Divider(
               color: Colors.grey,
               thickness: 0.5,
@@ -76,6 +81,27 @@ class _RecipePreviewState extends State<RecipePreview> {
             const SizedBox(height: 100),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.start,
+        runAlignment: WrapAlignment.start,
+        alignment: WrapAlignment.start,
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: widget.recipe.tags.asMap().entries.map((entry) {
+          // int index = entry.key;
+          String value = entry.value;
+          return Text(
+            "#$value",
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          );
+        }).toList(),
       ),
     );
   }
@@ -280,8 +306,7 @@ class _RecipePreviewState extends State<RecipePreview> {
           width: width * 0.9,
           height: width * 0.5,
           child: CachedNetworkImage(
-            imageUrl:
-                "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
+            imageUrl: widget.recipe.recipeUrl,
             fit: BoxFit.cover,
             progressIndicatorBuilder: (context, url, downloadProgress) =>
                 Center(
@@ -314,8 +339,8 @@ class _RecipePreviewState extends State<RecipePreview> {
           ),
           color: AppColors.primary,
         ),
-        child: const Center(
-          child: Text("Delicious Tart Recipe",
+        child: Center(
+          child: Text(widget.recipe.titleRecipe,
               textAlign: TextAlign.center, style: AppTextStyles.headingWhite),
         ),
       ),
@@ -346,9 +371,11 @@ class _RecipePreviewState extends State<RecipePreview> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildInfoItem(Icons.favorite, Colors.red, "12"),
+            _buildInfoItem(
+                Icons.favorite, Colors.red, "${widget.recipe.numberLikes}"),
             _buildInfoItem(Icons.star_outlined, Colors.yellow.shade600, "4.5"),
-            _buildInfoItem(Icons.timer_outlined, Colors.blue, "45min"),
+            _buildInfoItem(Icons.timer_outlined, Colors.blue,
+                _formatTime(widget.recipe.timer)),
           ],
         ),
       ),
@@ -389,7 +416,7 @@ class _RecipePreviewState extends State<RecipePreview> {
       padding: const EdgeInsets.only(left: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: ingredients.map((ingredient) {
+        children: widget.recipe.ingredients.map((ingredient) {
           return Card(
             elevation: 2,
             margin: const EdgeInsets.only(right: 20, top: 5),
@@ -477,5 +504,19 @@ class _RecipePreviewState extends State<RecipePreview> {
         ],
       ),
     );
+  }
+
+  String _formatTime(double minutes) {
+    int hours = minutes ~/ 60;
+    int mins = (minutes % 60).toInt();
+    if (hours > 0) {
+      if (mins == 0) {
+        return '${hours}h';
+      } else {
+        return '${hours}h ${mins}m';
+      }
+    } else {
+      return '${mins}m';
+    }
   }
 }
