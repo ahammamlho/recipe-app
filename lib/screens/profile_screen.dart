@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/dto/recipce_dto.dart';
 import 'package:recipe/screens/recipe_preview.dart';
+import 'package:recipe/services/liked_recipe_service.dart';
 import 'package:recipe/services/recipe_service.dart';
 import 'package:recipe/services/user_service.dart';
 import 'package:recipe/dto/user_dto.dart';
@@ -20,6 +21,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final userService = UserService();
   final recipceService = RecipceService();
+  final likedRecipeService = LikedRecipeService();
 
   late UserDTO userData;
   List<RecipceDto> recipces = [];
@@ -140,7 +142,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildImage(BuildContext context, RecipceDto recipe) {
     return GestureDetector(
       onTap: () {
-        Get.to(RecipePreview(recipe: recipe));
+        // Get.to(RecipePreview(recipe: recipe));
+        print(recipe.isLikedByOwner);
       },
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -166,8 +169,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.favorite,
-              color: Colors.red, size: AppSizes.iconSize),
+          GestureDetector(
+            onTap: () async {
+              final likedTmp =
+                  await likedRecipeService.toggleLikedRecipe(recipce.uuid);
+              setState(() {
+                recipce.isLikedByOwner = likedTmp;
+                if (likedTmp) {
+                  recipce.numberLikes++;
+                } else {
+                  recipce.numberLikes--;
+                }
+              });
+            },
+            child: Icon(Icons.favorite,
+                color: recipce.isLikedByOwner ? Colors.red : Colors.grey[300],
+                size: AppSizes.iconSize),
+          ),
           const SizedBox(width: 5),
           Text("${recipce.numberLikes}", style: AppTextStyles.body),
           const SizedBox(width: 10),

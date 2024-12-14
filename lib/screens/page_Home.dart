@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
-import 'package:get/get.dart';
 import 'package:recipe/auth/auth_service.dart';
 import 'package:recipe/const/app_styles.dart';
-import 'package:recipe/screens/recipe_preview.dart';
 import 'package:recipe/widgets/search_bar.dart';
 
 class PageHome extends StatefulWidget {

@@ -1,5 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 class RecipceDto {
   final String uuid;
   final String uuidUser;
@@ -8,8 +6,9 @@ class RecipceDto {
   final List<dynamic> steps;
   final String recipeUrl;
   final double timer;
-  final int numberLikes;
+  int numberLikes;
   final List<dynamic> tags;
+  bool isLikedByOwner;
 
   RecipceDto({
     required this.uuid,
@@ -21,6 +20,7 @@ class RecipceDto {
     required this.timer,
     required this.numberLikes,
     required this.tags,
+    required this.isLikedByOwner,
   });
 
   factory RecipceDto.fromJson(Map<String, dynamic> json) {
@@ -34,6 +34,7 @@ class RecipceDto {
       timer: (json['timer']).toDouble(),
       numberLikes: json['number_likes'],
       tags: json['tags'],
+      isLikedByOwner: false,
     );
   }
 

@@ -419,6 +419,7 @@ class _AddRecipeState extends State<AddRecipe> {
             timer: _selectedMinutes,
             numberLikes: 0,
             tags: trimList(tags),
+            isLikedByOwner: false,
           );
 
           await recipceService.addRecipe(recipeData);

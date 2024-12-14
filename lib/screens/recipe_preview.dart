@@ -19,19 +19,6 @@ class _RecipePreviewState extends State<RecipePreview> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 
-    List<String> ingredients = [
-      "1/4 olive oil",
-      "3 cloves",
-      "1 red onion, sliced",
-      "1 tomato"
-    ];
-    List<String> directions = [
-      "Make the Crust: Combine flour and butter until crumbly. Add water gradually to form dough. Chill for 30 minutes.",
-      "Prepare the Tarts: Roll out the dough, cut into circles, and press into a muffin tin to form shells.",
-      "Prepare the Filling: Add ingredients into the tart shells.",
-      "Bake: Preheat oven to 375°F (190°C) and bake for 20-25 minutes until golden."
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recipe Details"),
@@ -43,7 +30,7 @@ class _RecipePreviewState extends State<RecipePreview> {
           children: [
             _buildImageSection(width),
             _buildSectionTitle("Ingredients"),
-            _buildIngredientsList(ingredients),
+            _buildIngredientsList(),
             _buildSectionTitle("Steps"),
             TimeLineWidget(
               steps: widget.recipe.steps,
@@ -412,7 +399,7 @@ class _RecipePreviewState extends State<RecipePreview> {
     );
   }
 
-  Widget _buildIngredientsList(List<String> ingredients) {
+  Widget _buildIngredientsList() {
     return Padding(
       padding: const EdgeInsets.only(left: 20),
       child: Column(
