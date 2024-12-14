@@ -141,9 +141,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildImage(BuildContext context, RecipceDto recipe) {
     return GestureDetector(
-      onTap: () {
-        // Get.to(RecipePreview(recipe: recipe));
-        print(recipe.isLikedByOwner);
+      onTap: () async {
+        final updatedRecipe = await Get.to(() => RecipePreview(recipe: recipe));
+        if (updatedRecipe != null) {
+          setState(() {
+            recipe = updatedRecipe;
+          });
+        }
       },
       child: ClipRRect(
         borderRadius: const BorderRadius.only(

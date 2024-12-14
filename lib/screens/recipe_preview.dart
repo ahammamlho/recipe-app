@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
+import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/services/liked_recipe_service.dart';
 import 'package:recipe/widgets/expandable_text.dart';
 import 'package:recipe/widgets/time_line_widget.dart';
 
@@ -15,6 +17,8 @@ class RecipePreview extends StatefulWidget {
 }
 
 class _RecipePreviewState extends State<RecipePreview> {
+  final likedRecipeService = LikedRecipeService();
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -23,6 +27,12 @@ class _RecipePreviewState extends State<RecipePreview> {
       appBar: AppBar(
         title: const Text("Recipe Details"),
         backgroundColor: Colors.blueAccent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back(result: widget.recipe);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -375,7 +385,27 @@ class _RecipePreviewState extends State<RecipePreview> {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          Icon(icon, color: iconColor, size: AppSizes.iconSize),
+          icon == Icons.favorite
+              ? GestureDetector(
+                  onTap: () async {
+                    final likedTmp = await likedRecipeService
+                        .toggleLikedRecipe(widget.recipe.uuid);
+                    setState(() {
+                      widget.recipe.isLikedByOwner = likedTmp;
+                      if (likedTmp) {
+                        widget.recipe.numberLikes++;
+                      } else {
+                        widget.recipe.numberLikes--;
+                      }
+                    });
+                  },
+                  child: Icon(Icons.favorite,
+                      color: widget.recipe.isLikedByOwner
+                          ? Colors.red
+                          : Colors.grey[300],
+                      size: AppSizes.iconSize),
+                )
+              : Icon(icon, color: iconColor, size: AppSizes.iconSize),
           const SizedBox(width: 5),
           Text(
             text,
