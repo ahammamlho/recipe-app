@@ -47,7 +47,8 @@ class _RecipePreviewState extends State<RecipePreview> {
             _buildSectionTitle("Steps"),
             TimeLineWidget(
               steps: widget.recipe.steps,
-              isCheckedList: List.generate(directions.length, (index) => false),
+              isCheckedList:
+                  List.generate(widget.recipe.steps.length, (index) => false),
             ),
             _buildSectionTitle("Tags"),
             _buildTagsSection(),
