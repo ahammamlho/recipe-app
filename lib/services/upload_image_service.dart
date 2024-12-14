@@ -20,4 +20,21 @@ class UploadImageService {
     }
     return null;
   }
+
+  Future<String?> uploadImageRecipe(String bucket, File file) async {
+    final fileName = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    try {
+      await supabase.storage.from(bucket).remove([fileName]);
+
+      await supabase.storage.from(bucket).upload(fileName, file);
+
+      final imageUrl = supabase.storage.from(bucket).getPublicUrl(fileName);
+
+      return imageUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
+    return null;
+  }
 }

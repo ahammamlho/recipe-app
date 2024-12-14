@@ -26,12 +26,12 @@ class RecipceDto {
       uuid: json['uuid'],
       uuidUser: json['uuid_user'],
       titleRecipe: json['title_recipe'],
-      ingredients: json['ingredients'],
-      steps: json['steps'],
+      ingredients: List<String>.from(json['ingredients']),
+      steps: List<String>.from(json['steps']),
       recipeUrl: json['recipe_url'],
       timer: json['timer'],
       numberLikes: json['number_likes'],
-      tags: json['tags'],
+      tags: List<String>.from(json['tags']),
     );
   }
 
@@ -40,12 +40,12 @@ class RecipceDto {
       'uuid': uuid,
       'uuid_user': uuidUser,
       'title_recipe': titleRecipe,
-      'ingredients': ingredients,
-      'steps': steps,
+      'ingredients': '[${ingredients.map((e) => '"$e"').join(', ')}]',
+      'steps': '[${steps.map((e) => '"$e"').join(', ')}]',
       'recipe_url': recipeUrl,
       'timer': timer,
       'number_likes': numberLikes,
-      "tags": tags,
+      "tags": '[${tags.map((e) => '"$e"').join(', ')}]',
     };
   }
 }

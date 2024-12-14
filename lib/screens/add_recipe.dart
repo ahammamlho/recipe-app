@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/services/recipe_service.dart';
+import 'package:recipe/services/upload_image_service.dart';
 import 'package:recipe/state/controller.dart';
 
 class AddRecipe extends StatefulWidget {
@@ -12,13 +17,15 @@ class AddRecipe extends StatefulWidget {
 
 class _AddRecipeState extends State<AddRecipe> {
   final MyController myController = Get.find<MyController>();
+  final uploadImageService = UploadImageService();
+  final recipceService = RecipceService();
 
   final List<String> ingredients = [""];
   final List<String> preparations = [""];
   final List<String> tags = [];
   TextEditingController tagController = TextEditingController();
-
   TextEditingController titleController = TextEditingController();
+  File? _imageFile;
 
   double selectedMinutes = 15.0;
   double _selectedMinutes = 15.0;
@@ -39,8 +46,8 @@ class _AddRecipeState extends State<AddRecipe> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildUploadPictureSection(width),
-              const SizedBox(height: 10),
+              _buildUploadPictureSection(context, width),
+              const SizedBox(height: 20),
               _buildTitleField(),
               const SizedBox(height: 10),
               _buildPreparationTime(),
@@ -79,7 +86,7 @@ class _AddRecipeState extends State<AddRecipe> {
     );
   }
 
-  Widget _buildUploadPictureSection(double width) {
+  Widget _buildUploadPictureSection(BuildContext context, double width) {
     return Container(
       margin: const EdgeInsets.only(top: 20),
       height: width * 0.4,
@@ -88,13 +95,28 @@ class _AddRecipeState extends State<AddRecipe> {
         border: Border.all(width: 0.4),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.camera_alt_outlined, size: 30),
-          SizedBox(height: 2),
-          Text("Upload Recipe Picture", style: TextStyle(fontSize: 18)),
-        ],
+      child: GestureDetector(
+        onTap: () {
+          _showUploadPicDialog(context, width);
+        },
+        child: _imageFile == null
+            ? const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt_outlined, size: 30),
+                  SizedBox(height: 2),
+                  Text("Upload Recipe Picture", style: TextStyle(fontSize: 18)),
+                ],
+              )
+            : ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                child: Image.file(
+                  _imageFile!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
       ),
     );
   }
@@ -368,19 +390,23 @@ class _AddRecipeState extends State<AddRecipe> {
 
   Widget _buildActionButton(String text, Color color, double width) {
     return GestureDetector(
-      onTap: () {
-        final recipeData = RecipceDto(
-          uuid: "",
-          uuidUser: myController.uuidUser,
-          titleRecipe: titleController.text,
-          ingredients: trimList(ingredients),
-          steps: trimList(preparations),
-          recipeUrl: '',
-          timer: _selectedMinutes,
-          numberLikes: 0,
-          tags: trimList(tags),
-        );
-        print(recipeData.toJson());
+      onTap: () async {
+        final recipeUrl =
+            await uploadImageService.uploadImageRecipe("recipes", _imageFile!);
+        if (recipeUrl != null) {
+          final recipeData = RecipceDto(
+            uuid: "",
+            uuidUser: myController.uuidUser,
+            titleRecipe: titleController.text,
+            ingredients: trimList(ingredients),
+            steps: trimList(preparations),
+            recipeUrl: recipeUrl,
+            timer: _selectedMinutes,
+            numberLikes: 0,
+            tags: trimList(tags),
+          );
+          await recipceService.addRecipe(recipeData);
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(top: 20),
@@ -405,5 +431,81 @@ class _AddRecipeState extends State<AddRecipe> {
     List<String> cleanedList =
         strings.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     return cleanedList;
+  }
+
+  void _showUploadPicDialog(BuildContext context, double width) {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismiss by tapping outside
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15), // Rounded corners
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.white,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Upload recipe picture',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                GestureDetector(
+                  onTap: () {
+                    getPhoto(true);
+                  },
+                  child: Container(
+                      width: width * 0.5,
+                      padding: const EdgeInsets.only(top: 5, bottom: 5),
+                      child: const Center(
+                        child: Text("Take a photo",
+                            style: TextStyle(color: Colors.black)),
+                      )),
+                ),
+                const Divider(color: Colors.black, thickness: 0.2),
+                GestureDetector(
+                  onTap: () {
+                    getPhoto(false);
+                  },
+                  child: Container(
+                      width: width * 0.5,
+                      padding: const EdgeInsets.only(top: 5, bottom: 5),
+                      child: const Center(
+                        child: Text("Choose a photo",
+                            style: TextStyle(color: Colors.black)),
+                      )),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> getPhoto(bool isFromCamera) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+          source: isFromCamera ? ImageSource.camera : ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+        Get.back();
+      }
+    } catch (e) {
+      print("Error capturing photo: $e");
+    }
   }
 }
