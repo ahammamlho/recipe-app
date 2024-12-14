@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:recipe/auth/auth_gate.dart';
-import 'package:recipe/state/controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  Get.put(MyController());
-
   await dotenv.load(fileName: ".env");
   await Supabase.initialize(
     anonKey: dotenv.env['SUPABASE_KEY'] as String,

@@ -1,12 +1,14 @@
 import 'dart:io';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/screens/profile_screen.dart';
 import 'package:recipe/services/recipe_service.dart';
 import 'package:recipe/services/upload_image_service.dart';
-import 'package:recipe/state/controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddRecipe extends StatefulWidget {
   const AddRecipe({super.key});
@@ -16,13 +18,12 @@ class AddRecipe extends StatefulWidget {
 }
 
 class _AddRecipeState extends State<AddRecipe> {
-  final MyController myController = Get.find<MyController>();
   final uploadImageService = UploadImageService();
   final recipceService = RecipceService();
 
-  final List<String> ingredients = [""];
-  final List<String> preparations = [""];
-  final List<String> tags = [];
+  List<String> ingredients = [""];
+  List<String> preparations = [""];
+  List<String> tags = [];
   TextEditingController tagController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   File? _imageFile;
@@ -348,8 +349,8 @@ class _AddRecipeState extends State<AddRecipe> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  if (tagController.text != "") {
-                    tags.add(tagController.text);
+                  if (tagController.text.trim() != "") {
+                    tags.add(tagController.text.trim());
                     tagController = TextEditingController(text: "");
                   }
                 });
@@ -391,13 +392,27 @@ class _AddRecipeState extends State<AddRecipe> {
   Widget _buildActionButton(String text, Color color, double width) {
     return GestureDetector(
       onTap: () async {
-        final recipeUrl =
-            await uploadImageService.uploadImageRecipe("recipes", _imageFile!);
-        if (recipeUrl != null) {
+        String? validationMessage = _validateRecipeInputs();
+        if (validationMessage != null) {
+          _showURequiredItemDialog(context, validationMessage);
+          return;
+        }
+
+        try {
+          final recipeUrl = await uploadImageService.uploadImageRecipe(
+            "recipes",
+            _imageFile!,
+          );
+          if (recipeUrl == null) {
+            _showURequiredItemDialog(context, "Failed to upload recipe image.");
+            return;
+          }
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          final String uuidUser = prefs.getString('uuid_user') ?? "";
           final recipeData = RecipceDto(
             uuid: "",
-            uuidUser: myController.uuidUser,
-            titleRecipe: titleController.text,
+            uuidUser: uuidUser,
+            titleRecipe: titleController.text.trim(),
             ingredients: trimList(ingredients),
             steps: trimList(preparations),
             recipeUrl: recipeUrl,
@@ -405,7 +420,12 @@ class _AddRecipeState extends State<AddRecipe> {
             numberLikes: 0,
             tags: trimList(tags),
           );
+
           await recipceService.addRecipe(recipeData);
+          _showSuccessDialog(context, "Recipe added successfully!");
+        } catch (error) {
+          _showURequiredItemDialog(
+              context, "Failed to add recipe. Please try again.");
         }
       },
       child: Container(
@@ -420,11 +440,61 @@ class _AddRecipeState extends State<AddRecipe> {
           child: Text(
             text,
             style: const TextStyle(
-                fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String? _validateRecipeInputs() {
+    if (_imageFile == null) {
+      return "Please upload a recipe picture.";
+    } else if (titleController.text.trim().isEmpty) {
+      return "Please provide a title.";
+    } else if (trimList(ingredients).isEmpty) {
+      return "Please add at least one ingredient.";
+    } else if (trimList(preparations).isEmpty) {
+      return "Please add at least one step.";
+    } else if (trimList(tags).isEmpty) {
+      return "Please add at least one tag.";
+    }
+    return null;
+  }
+
+  void _showSuccessDialog(BuildContext context, String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.rightSlide,
+      dismissOnTouchOutside: false,
+      desc: message,
+      descTextStyle: const TextStyle(fontSize: 18),
+      btnCancelText: "Add new recipe",
+      btnOkText: "Profile",
+      btnCancelOnPress: () {
+        cleanData();
+      },
+      btnOkOnPress: () {
+        cleanData();
+        Get.to(() => const ProfileScreen());
+      },
+    ).show();
+  }
+
+  void cleanData() {
+    setState(() {
+      _imageFile = null;
+      titleController = TextEditingController(text: "");
+      tagController = TextEditingController(text: "");
+      ingredients = [""];
+      preparations = [""];
+      tags = [];
+      _selectedMinutes = 15.0;
+    });
   }
 
   List<String> trimList(List<String> strings) {
@@ -434,62 +504,66 @@ class _AddRecipeState extends State<AddRecipe> {
   }
 
   void _showUploadPicDialog(BuildContext context, double width) {
-    showDialog(
+    AwesomeDialog(
       context: context,
-      barrierDismissible: true, // Allow dismiss by tapping outside
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15), // Rounded corners
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Colors.white,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Upload recipe picture',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () {
-                    getPhoto(true);
-                  },
-                  child: Container(
-                      width: width * 0.5,
-                      padding: const EdgeInsets.only(top: 5, bottom: 5),
-                      child: const Center(
-                        child: Text("Take a photo",
-                            style: TextStyle(color: Colors.black)),
-                      )),
-                ),
-                const Divider(color: Colors.black, thickness: 0.2),
-                GestureDetector(
-                  onTap: () {
-                    getPhoto(false);
-                  },
-                  child: Container(
-                      width: width * 0.5,
-                      padding: const EdgeInsets.only(top: 5, bottom: 5),
-                      child: const Center(
-                        child: Text("Choose a photo",
-                            style: TextStyle(color: Colors.black)),
-                      )),
-                ),
-              ],
+      dialogType: DialogType.info,
+      animType: AnimType.rightSlide,
+      title: 'Dialog Title',
+      desc: 'Upload recipe picture',
+      // btnCancelOnPress: () {},
+      // btnOkOnPress: () {},
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Upload recipe picture',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        );
-      },
-    );
+          const SizedBox(height: 30),
+          GestureDetector(
+            onTap: () {
+              getPhoto(true);
+            },
+            child: Container(
+                width: width * 0.5,
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: const Center(
+                  child: Text("Take a photo",
+                      style: TextStyle(color: Colors.black)),
+                )),
+          ),
+          const Divider(color: Colors.black, thickness: 0.2),
+          GestureDetector(
+            onTap: () {
+              getPhoto(false);
+            },
+            child: Container(
+                width: width * 0.5,
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: const Center(
+                  child: Text("Choose a photo",
+                      style: TextStyle(color: Colors.black)),
+                )),
+          ),
+        ],
+      ),
+    ).show();
+  }
+
+  void _showURequiredItemDialog(BuildContext context, String text) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.info,
+      animType: AnimType.rightSlide,
+      dismissOnTouchOutside: false,
+      desc: text,
+      descTextStyle: const TextStyle(fontSize: 18),
+      btnCancelOnPress: () {},
+      // btnOkOnPress: () {},
+    ).show();
   }
 
   Future<void> getPhoto(bool isFromCamera) async {

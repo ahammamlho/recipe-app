@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:recipe/dto/user_dto.dart';
-import 'package:recipe/state/controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:crypto/crypto.dart';
@@ -13,8 +12,6 @@ import 'dart:math';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
-
-  final MyController myController = Get.put(MyController());
 
   Future<AuthResponse?> googleSignIn() async {
     try {
@@ -114,6 +111,8 @@ class AuthService {
   }
 
   Future<void> addUserIfNotExist(UserDTO user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     try {
       final existingUser =
           await _supabase.from('user').select().eq('email', user.email);
@@ -133,9 +132,9 @@ class AuthService {
           "views_profile": 0,
           "status": "New member",
         }).select();
-        myController.changeUuidUser(resp[0]["uuid"]);
+        await prefs.setString('uuid_user', resp[0]["uuid"]);
       } else {
-        myController.changeUuidUser(existingUser[0]["uuid"]);
+        await prefs.setString('uuid_user', existingUser[0]["uuid"]);
       }
     } catch (error) {
       print(error);

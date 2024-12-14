@@ -1,4 +1,5 @@
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecipceService {
@@ -15,6 +16,23 @@ class RecipceService {
       print(resp);
     } catch (e) {
       print("Exception occurred during recipe insert: $e");
+    }
+  }
+
+  Future<List<RecipceDto>?> getMyRecipe() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String uuidUser = prefs.getString('uuid_user') ?? "";
+      final resp =
+          await _supabase.from('recipe').select().eq("uuid_user", uuidUser);
+      print(resp);
+      List<RecipceDto> recipces =
+          resp.map((recipe) => RecipceDto.fromJson(recipe)).toList();
+
+      return recipces;
+    } catch (e) {
+      print("Exception occurred during recipe select: $e");
+      return null;
     }
   }
 }

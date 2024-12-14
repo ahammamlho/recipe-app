@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
 import 'package:recipe/const/app_styles.dart';
+import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/services/recipe_service.dart';
 import 'package:recipe/services/user_service.dart';
 import 'package:recipe/dto/user_dto.dart';
 import 'package:recipe/screens/edit_profile_screen.dart';
@@ -15,8 +18,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final userService = UserService();
+  final recipceService = RecipceService();
 
   late UserDTO userData;
+  List<RecipceDto> recipces = [];
   bool loading = true;
 
   @override
@@ -28,6 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> getDataUser() async {
     try {
       UserDTO? data = await userService.getCurrentUserData();
+      List<RecipceDto>? recipcesTmp = await recipceService.getMyRecipe();
+
       if (data == null) {
         setState(() {
           loading = false;
@@ -36,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
       setState(() {
         userData = data;
+        if (recipcesTmp != null) recipces = recipcesTmp;
         loading = false;
       });
     } catch (e) {
@@ -70,12 +78,133 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildStatsSection(),
                     const SizedBox(height: 20),
                     _buildActionButtons(width),
+                    const SizedBox(height: 20),
+                    recipces.isNotEmpty
+                        ? GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 1,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 1.4,
+                            ),
+                            itemCount: recipces.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return _buildContent(context, recipces[index]);
+                            },
+                          )
+                        : Container(),
                   ],
                 ),
               ),
             )
           : const Center(child: CircularProgressIndicator()),
     );
+  }
+
+  Widget _buildContent(BuildContext context, RecipceDto recipce) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildImage(context, recipce),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              recipce.titleRecipe,
+              style: AppTextStyles.heading2,
+            ),
+          ),
+          _buildFooter(recipce),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImage(BuildContext context, RecipceDto recipce) {
+    return GestureDetector(
+      onTap: () {
+        // Get.to(const RecipePreview());
+      },
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+        child: CachedNetworkImage(
+          imageUrl: recipce.recipeUrl,
+          width: double.infinity,
+          height: 200,
+          fit: BoxFit.cover,
+          progressIndicatorBuilder: (context, url, progress) =>
+              const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter(RecipceDto recipce) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(Icons.favorite,
+              color: Colors.red, size: AppSizes.iconSize),
+          const SizedBox(width: 5),
+          Text("${recipce.numberLikes}", style: AppTextStyles.body),
+          const SizedBox(width: 10),
+          RatingStars(
+            value: 3,
+            onValueChanged: (v) {},
+            starCount: 5,
+            starSize: 18,
+            starSpacing: 2,
+            maxValue: 5,
+            valueLabelVisibility: false,
+            starOffColor: const Color(0xffe7e8ea),
+            starColor: Colors.yellow,
+          ),
+          const SizedBox(width: 5),
+          const Text("12 Reviews", style: AppTextStyles.body),
+          const Spacer(),
+          const Icon(Icons.timer_outlined,
+              color: Colors.green, size: AppSizes.iconSize),
+          const SizedBox(width: 5),
+          Text(_formatTime(recipce.timer), style: AppTextStyles.body),
+        ],
+      ),
+    );
+  }
+
+  String _formatTime(double minutes) {
+    int hours = minutes ~/ 60;
+    int mins = (minutes % 60).toInt();
+    if (hours > 0) {
+      if (mins == 0) {
+        return '${hours}h';
+      } else {
+        return '${hours}h ${mins}m';
+      }
+    } else {
+      return '${mins}m';
+    }
   }
 
   Widget _buildProfileHeader() {

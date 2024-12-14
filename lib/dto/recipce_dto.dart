@@ -1,13 +1,15 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class RecipceDto {
   final String uuid;
   final String uuidUser;
   final String titleRecipe;
-  final List<String> ingredients;
-  final List<String> steps;
+  final List<dynamic> ingredients;
+  final List<dynamic> steps;
   final String recipeUrl;
   final double timer;
   final int numberLikes;
-  final List<String> tags;
+  final List<dynamic> tags;
 
   RecipceDto({
     required this.uuid,
@@ -26,12 +28,12 @@ class RecipceDto {
       uuid: json['uuid'],
       uuidUser: json['uuid_user'],
       titleRecipe: json['title_recipe'],
-      ingredients: List<String>.from(json['ingredients']),
-      steps: List<String>.from(json['steps']),
+      ingredients: json['ingredients'],
+      steps: json['steps'],
       recipeUrl: json['recipe_url'],
-      timer: json['timer'],
+      timer: (json['timer']).toDouble(),
       numberLikes: json['number_likes'],
-      tags: List<String>.from(json['tags']),
+      tags: json['tags'],
     );
   }
 
@@ -40,12 +42,12 @@ class RecipceDto {
       'uuid': uuid,
       'uuid_user': uuidUser,
       'title_recipe': titleRecipe,
-      'ingredients': '[${ingredients.map((e) => '"$e"').join(', ')}]',
-      'steps': '[${steps.map((e) => '"$e"').join(', ')}]',
+      'ingredients': ingredients,
+      'steps': steps,
       'recipe_url': recipeUrl,
       'timer': timer,
       'number_likes': numberLikes,
-      "tags": '[${tags.map((e) => '"$e"').join(', ')}]',
+      "tags": tags,
     };
   }
 }
