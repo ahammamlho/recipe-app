@@ -29,6 +29,9 @@ class _RecipePreviewState extends State<RecipePreview> {
   final uploadImageService = UploadImageService();
   final reviewService = ReviewService();
 
+  bool isOwnerReviewd = false;
+  bool isEditing = false;
+
   ReviewDto review = ReviewDto(
       uuid: "",
       uuidUser: "",
@@ -41,6 +44,7 @@ class _RecipePreviewState extends State<RecipePreview> {
       createdAt: DateTime.now());
   File? _imageFile;
   List<ReviewDto>? reviews;
+  String uuidUser = '';
   @override
   void initState() {
     super.initState();
@@ -48,11 +52,13 @@ class _RecipePreviewState extends State<RecipePreview> {
   }
 
   void getData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    uuidUser = prefs.getString('uuid_user') ?? "";
     final res = await reviewService.getReviewByRecipe(widget.recipe.uuid);
-    print(res?[0].userName);
     setState(() {
       reviews = res;
     });
+    checkIsUserReviewd();
   }
 
   @override
@@ -92,15 +98,46 @@ class _RecipePreviewState extends State<RecipePreview> {
               indent: 20,
               endIndent: 20,
             ),
-            _buildSectionTitle("Reviews"),
-            reviews != null ? _buildReviewsSection(width) : Container(),
-            const Divider(
-              color: Colors.grey,
-              thickness: 0.5,
-              indent: 20,
-              endIndent: 20,
-            ),
-            _buildLeaveReview(width),
+            reviews != null && reviews!.isNotEmpty
+                ? Column(
+                    children: [
+                      _buildSectionTitle("Reviews"),
+                      _buildReviewsSection(width),
+                      const Divider(
+                        color: Colors.grey,
+                        thickness: 0.5,
+                        indent: 20,
+                        endIndent: 20,
+                      )
+                    ],
+                  )
+                : Container(),
+            isOwnerReviewd
+                ? Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isOwnerReviewd = false;
+                          isEditing = true;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        padding: const EdgeInsets.only(
+                            top: 5, bottom: 5, left: 15, right: 15),
+                        decoration: BoxDecoration(
+                          border: Border.all(width: 0.4),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(5)),
+                        ),
+                        child: const Text(
+                          'Edit review',
+                          style: AppTextStyles.body,
+                        ),
+                      ),
+                    ),
+                  )
+                : _buildLeaveReview(width),
             Container(
               padding: const EdgeInsets.only(top: 20),
               child: const Divider(
@@ -114,7 +151,6 @@ class _RecipePreviewState extends State<RecipePreview> {
                 ? Column(
                     children: reviews!.asMap().entries.map((entry) {
                       ReviewDto feedback = entry.value;
-                      print(feedback.userName);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: _buildUserReviewSection(width, feedback),
@@ -127,6 +163,17 @@ class _RecipePreviewState extends State<RecipePreview> {
         ),
       ),
     );
+  }
+
+  void checkIsUserReviewd() {
+    for (var rvw in reviews!) {
+      if (rvw.uuidUser == uuidUser) {
+        setState(() {
+          isOwnerReviewd = true;
+          review = rvw;
+        });
+      }
+    }
   }
 
   Widget _buildTagsSection() {
@@ -188,7 +235,7 @@ class _RecipePreviewState extends State<RecipePreview> {
           ),
           const SizedBox(height: 10),
           RatingStars(
-            value: 3,
+            value: summury[0],
             onValueChanged: (v) {},
             starCount: 5,
             starSize: 25,
@@ -275,14 +322,10 @@ class _RecipePreviewState extends State<RecipePreview> {
                           review.feedback = value;
                         },
                         decoration: InputDecoration(
-                          // labelText: "Comment",
                           hintText: "Type something...",
-                          border:
-                              InputBorder.none, // No border when not focused
-                          enabledBorder:
-                              InputBorder.none, // No border when enabled
-                          focusedBorder:
-                              InputBorder.none, // No border when focused
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           suffixIcon: IconButton(
                             icon: Icon(Icons.attach_file,
                                 color: AppColors.iconColor),
@@ -292,17 +335,30 @@ class _RecipePreviewState extends State<RecipePreview> {
                           ),
                         ),
                       ),
-                      _imageFile != null
-                          ? ClipRRect(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10)),
-                              child: Image.file(
-                                _imageFile!,
-                                // width: 80,
-                                // height: 80,
-                                fit: BoxFit.cover,
-                              ),
-                            )
+                      _imageFile != null || review.imgUrl != ''
+                          ? _imageFile != null
+                              ? ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10)),
+                                  child: Image.file(
+                                    _imageFile!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: CachedNetworkImage(
+                                    imageUrl: review.imgUrl,
+                                    fit: BoxFit.cover,
+                                    progressIndicatorBuilder: (context, url,
+                                            progress) =>
+                                        const Center(
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2)),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                )
                           : Container(),
                     ],
                   ),
@@ -319,32 +375,29 @@ class _RecipePreviewState extends State<RecipePreview> {
                   ),
                   child: IconButton(
                       onPressed: () async {
-                        final SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        final String uuidUser =
-                            prefs.getString('uuid_user') ?? "";
                         String imgUrl = "";
                         if (_imageFile != null) {
                           imgUrl = await uploadImageService.uploadImageReview(
                               'review', _imageFile!);
+                          review.imgUrl = imgUrl;
                         }
-                        review.imgUrl = imgUrl;
+                        review.createdAt = DateTime.now();
                         review.uuidUser = uuidUser;
                         review.uuidRecipe = widget.recipe.uuid;
-                        await reviewService.addReview(review);
-
+                        if (isEditing) {
+                          await reviewService.updateReview(review);
+                        } else {
+                          await reviewService.addReview(review);
+                        }
+                        final res = await reviewService
+                            .getReviewByRecipe(widget.recipe.uuid);
                         setState(() {
+                          reviews = res;
+                        });
+                        setState(() {
+                          isEditing = false;
                           _imageFile = null;
-                          review = ReviewDto(
-                              uuid: "",
-                              uuidUser: "",
-                              uuidRecipe: "",
-                              rate: 5,
-                              feedback: '',
-                              imgUrl: '',
-                              userAvatar: '',
-                              userName: '',
-                              createdAt: DateTime.now());
+                          isOwnerReviewd = true;
                         });
                       },
                       icon: const Icon(

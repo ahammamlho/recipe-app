@@ -21,6 +21,29 @@ class ReviewService {
     }
   }
 
+  Future<void> updateReview(ReviewDto reviewData) async {
+    print({
+      'rate': reviewData.rate,
+      'feedback': reviewData.feedback,
+      'img_url': reviewData.imgUrl,
+      'created_at': reviewData.createdAt.toIso8601String(),
+    });
+    try {
+      await _supabase
+          .from('review')
+          .update({
+            'rate': reviewData.rate,
+            'feedback': reviewData.feedback,
+            'img_url': reviewData.imgUrl,
+            'created_at': reviewData.createdAt.toIso8601String(),
+          })
+          .eq('uuid', reviewData.uuid)
+          .select();
+    } catch (e) {
+      print("Exception occurred during recipe insert: $e");
+    }
+  }
+
   Future<List<ReviewDto>?> getReviewByRecipe(String uuidRecipe) async {
     try {
       final resp =
@@ -32,7 +55,6 @@ class ReviewService {
       final List<ReviewDto> result = await Future.wait(
         reviews.map((review) async {
           final user = await userService.getCurrentUserData();
-          // print(user!.userName);
           review.userName = user!.userName;
           review.userAvatar = user.avatarUrl;
           return review;
