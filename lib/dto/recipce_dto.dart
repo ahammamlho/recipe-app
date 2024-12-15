@@ -9,6 +9,8 @@ class RecipceDto {
   int numberLikes;
   final List<dynamic> tags;
   bool isLikedByOwner;
+  double rateReviews;
+  int numberReviews;
 
   RecipceDto({
     required this.uuid,
@@ -21,21 +23,24 @@ class RecipceDto {
     required this.numberLikes,
     required this.tags,
     required this.isLikedByOwner,
+    required this.rateReviews,
+    required this.numberReviews,
   });
 
   factory RecipceDto.fromJson(Map<String, dynamic> json) {
     return RecipceDto(
-      uuid: json['uuid'],
-      uuidUser: json['uuid_user'],
-      titleRecipe: json['title_recipe'],
-      ingredients: json['ingredients'],
-      steps: json['steps'],
-      recipeUrl: json['recipe_url'],
-      timer: (json['timer']).toDouble(),
-      numberLikes: json['number_likes'],
-      tags: json['tags'],
-      isLikedByOwner: false,
-    );
+        uuid: json['uuid'],
+        uuidUser: json['uuid_user'],
+        titleRecipe: json['title_recipe'],
+        ingredients: json['ingredients'],
+        steps: json['steps'],
+        recipeUrl: json['recipe_url'],
+        timer: (json['timer']).toDouble(),
+        numberLikes: json['number_likes'],
+        tags: json['tags'],
+        isLikedByOwner: false,
+        rateReviews: 0.0,
+        numberReviews: 0);
   }
 
   Map<String, dynamic> toJson() {
@@ -49,6 +54,8 @@ class RecipceDto {
       'timer': timer,
       'number_likes': numberLikes,
       "tags": tags,
+      'rate_reviews': rateReviews,
+      'number_reviews': numberReviews
     };
   }
 }

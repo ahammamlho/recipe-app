@@ -420,6 +420,8 @@ class _AddRecipeState extends State<AddRecipe> {
             numberLikes: 0,
             tags: trimList(tags),
             isLikedByOwner: false,
+            rateReviews: 0.0,
+            numberReviews: 0,
           );
 
           await recipceService.addRecipe(recipeData);

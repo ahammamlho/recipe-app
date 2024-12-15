@@ -194,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text("${recipce.numberLikes}", style: AppTextStyles.body),
           const SizedBox(width: 10),
           RatingStars(
-            value: 3,
+            value: recipce.rateReviews,
             onValueChanged: (v) {},
             starCount: 5,
             starSize: 18,
@@ -205,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             starColor: Colors.yellow,
           ),
           const SizedBox(width: 5),
-          const Text("12 Reviews", style: AppTextStyles.body),
+          Text("${recipce.numberReviews} Reviews", style: AppTextStyles.body),
           const Spacer(),
           const Icon(Icons.timer_outlined,
               color: Colors.green, size: AppSizes.iconSize),

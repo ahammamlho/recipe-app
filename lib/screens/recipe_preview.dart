@@ -552,7 +552,8 @@ class _RecipePreviewState extends State<RecipePreview> {
           children: [
             _buildInfoItem(
                 Icons.favorite, Colors.red, "${widget.recipe.numberLikes}"),
-            _buildInfoItem(Icons.star_outlined, Colors.yellow.shade600, "4.5"),
+            _buildInfoItem(Icons.star_outlined, Colors.yellow.shade600,
+                widget.recipe.rateReviews.toStringAsFixed(1)),
             _buildInfoItem(Icons.timer_outlined, Colors.blue,
                 _formatTime(widget.recipe.timer)),
           ],
@@ -739,8 +740,6 @@ class _RecipePreviewState extends State<RecipePreview> {
       animType: AnimType.rightSlide,
       title: 'Dialog Title',
       desc: 'Upload recipe picture',
-      // btnCancelOnPress: () {},
-      // btnOkOnPress: () {},
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
