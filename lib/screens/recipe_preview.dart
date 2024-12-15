@@ -1,12 +1,20 @@
+import 'dart:io';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:recipe/const/app_styles.dart';
 import 'package:recipe/dto/recipce_dto.dart';
+import 'package:recipe/dto/review_dto.dart';
 import 'package:recipe/services/liked_recipe_service.dart';
+import 'package:recipe/services/review_service.dart';
+import 'package:recipe/services/upload_image_service.dart';
 import 'package:recipe/widgets/expandable_text.dart';
 import 'package:recipe/widgets/time_line_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RecipePreview extends StatefulWidget {
   final RecipceDto recipe;
@@ -18,6 +26,34 @@ class RecipePreview extends StatefulWidget {
 
 class _RecipePreviewState extends State<RecipePreview> {
   final likedRecipeService = LikedRecipeService();
+  final uploadImageService = UploadImageService();
+  final reviewService = ReviewService();
+
+  ReviewDto review = ReviewDto(
+      uuid: "",
+      uuidUser: "",
+      uuidRecipe: "",
+      rate: 5,
+      feedback: '',
+      imgUrl: '',
+      userAvatar: '',
+      userName: '',
+      createdAt: DateTime.now());
+  File? _imageFile;
+  List<ReviewDto>? reviews;
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  void getData() async {
+    final res = await reviewService.getReviewByRecipe(widget.recipe.uuid);
+    print(res?[0].userName);
+    setState(() {
+      reviews = res;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +93,7 @@ class _RecipePreviewState extends State<RecipePreview> {
               endIndent: 20,
             ),
             _buildSectionTitle("Reviews"),
-            _buildReviewsSection(width),
+            reviews != null ? _buildReviewsSection(width) : Container(),
             const Divider(
               color: Colors.grey,
               thickness: 0.5,
@@ -74,8 +110,18 @@ class _RecipePreviewState extends State<RecipePreview> {
                 endIndent: 20,
               ),
             ),
-            _buildUserReviewSection(width),
-            _buildUserReviewSection(width),
+            reviews != null
+                ? Column(
+                    children: reviews!.asMap().entries.map((entry) {
+                      ReviewDto feedback = entry.value;
+                      print(feedback.userName);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: _buildUserReviewSection(width, feedback),
+                      );
+                    }).toList(),
+                  )
+                : Container(),
             const SizedBox(height: 100),
           ],
         ),
@@ -104,12 +150,40 @@ class _RecipePreviewState extends State<RecipePreview> {
     );
   }
 
+  List<double> calculateRatingSummary() {
+    if (reviews == null) {
+      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    }
+    double totalRating = 0.0;
+    int count = reviews!.length;
+
+    for (var review in reviews!) {
+      totalRating += review.rate;
+    }
+    double averageRating = totalRating / count;
+
+    List<double> ratingDistribution = List.filled(5, 0.0);
+    for (var review in reviews!) {
+      if (review.rate >= 1 && review.rate <= 5) {
+        ratingDistribution[review.rate.toInt() - 1] += 1;
+      }
+    }
+
+    for (int i = 0; i < ratingDistribution.length; i++) {
+      ratingDistribution[i] = (ratingDistribution[i] / count);
+    }
+
+    return [averageRating, ...ratingDistribution];
+  }
+
   Widget _buildReviewsSection(double width) {
+    List<double> summury = calculateRatingSummary();
+    print(summury);
     return Center(
       child: Column(
         children: [
-          const Text(
-            "4.0",
+          Text(
+            summury[0].toStringAsFixed(2),
             style: AppTextStyles.heading,
           ),
           const SizedBox(height: 10),
@@ -125,20 +199,35 @@ class _RecipePreviewState extends State<RecipePreview> {
             starColor: Colors.yellow[700]!,
           ),
           const SizedBox(height: 10),
-          const Text(
-            "based on 23 reviews",
+          Text(
+            "based on ${reviews!.length} reviews",
             style: AppTextStyles.headingNormal,
           ),
           const SizedBox(height: 10),
-          _buildRatingSummarySection(width),
+          _buildRatingSummarySection(width, summury),
           const SizedBox(height: 20),
         ],
       ),
     );
   }
 
+  Widget _buildRatingSummarySection(double width, List<double> summury) {
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: Column(
+        children: [
+          _buildRatingSummary("Excellent", summury[5], Colors.green, width),
+          _buildRatingSummary("Good", summury[4], Colors.green[300]!, width),
+          _buildRatingSummary("Average", summury[3], Colors.yellow, width),
+          _buildRatingSummary(
+              "Below Average", summury[2], Colors.orange, width),
+          _buildRatingSummary("Poor", summury[1], Colors.red, width),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLeaveReview(double width) {
-    late double value = 4;
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Column(
@@ -150,10 +239,10 @@ class _RecipePreviewState extends State<RecipePreview> {
           ),
           const SizedBox(height: 5),
           RatingStars(
-            value: value,
+            value: review.rate,
             onValueChanged: (v) {
               setState(() {
-                value = v;
+                review.rate = v;
               });
             },
             starCount: 5,
@@ -170,26 +259,52 @@ class _RecipePreviewState extends State<RecipePreview> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: TextField(
-                  maxLines: null,
-                  decoration: InputDecoration(
-                    labelText: "Comment",
-                    hintText: "Type something...",
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.borderRadiusPrimary),
-                      borderSide:
-                          const BorderSide(width: 1), // Border thickness
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          const BorderSide(color: AppColors.border, width: 1),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.attach_file, color: AppColors.iconColor),
-                      onPressed: () {},
-                    ),
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 0.4),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  ),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller:
+                            TextEditingController(text: review.feedback),
+                        maxLines: null,
+                        onChanged: (value) {
+                          review.feedback = value;
+                        },
+                        decoration: InputDecoration(
+                          // labelText: "Comment",
+                          hintText: "Type something...",
+                          border:
+                              InputBorder.none, // No border when not focused
+                          enabledBorder:
+                              InputBorder.none, // No border when enabled
+                          focusedBorder:
+                              InputBorder.none, // No border when focused
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.attach_file,
+                                color: AppColors.iconColor),
+                            onPressed: () {
+                              _showUploadPicDialog(context, width);
+                            },
+                          ),
+                        ),
+                      ),
+                      _imageFile != null
+                          ? ClipRRect(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10)),
+                              child: Image.file(
+                                _imageFile!,
+                                // width: 80,
+                                // height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Container(),
+                    ],
                   ),
                 ),
               ),
@@ -203,7 +318,35 @@ class _RecipePreviewState extends State<RecipePreview> {
                     color: AppColors.primary,
                   ),
                   child: IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        final String uuidUser =
+                            prefs.getString('uuid_user') ?? "";
+                        String imgUrl = "";
+                        if (_imageFile != null) {
+                          imgUrl = await uploadImageService.uploadImageReview(
+                              'review', _imageFile!);
+                        }
+                        review.imgUrl = imgUrl;
+                        review.uuidUser = uuidUser;
+                        review.uuidRecipe = widget.recipe.uuid;
+                        await reviewService.addReview(review);
+
+                        setState(() {
+                          _imageFile = null;
+                          review = ReviewDto(
+                              uuid: "",
+                              uuidUser: "",
+                              uuidRecipe: "",
+                              rate: 5,
+                              feedback: '',
+                              imgUrl: '',
+                              userAvatar: '',
+                              userName: '',
+                              createdAt: DateTime.now());
+                        });
+                      },
                       icon: const Icon(
                         Icons.send_rounded,
                         color: Colors.white,
@@ -211,21 +354,6 @@ class _RecipePreviewState extends State<RecipePreview> {
                       )))
             ],
           )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRatingSummarySection(double width) {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      child: Column(
-        children: [
-          _buildRatingSummary("Excellent", 0.9, Colors.green, width),
-          _buildRatingSummary("Good", 0.5, Colors.green[300]!, width),
-          _buildRatingSummary("Average", 0.7, Colors.yellow, width),
-          _buildRatingSummary("Below Average", 0.3, Colors.orange, width),
-          _buildRatingSummary("Poor", 0.1, Colors.red, width),
         ],
       ),
     );
@@ -455,7 +583,7 @@ class _RecipePreviewState extends State<RecipePreview> {
     );
   }
 
-  Widget _buildUserReviewSection(double width) {
+  Widget _buildUserReviewSection(double width, ReviewDto feedback) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Column(
@@ -466,8 +594,7 @@ class _RecipePreviewState extends State<RecipePreview> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(100),
                 child: CachedNetworkImage(
-                  imageUrl:
-                      "https://media.istockphoto.com/id/1352937979/photo/vegetable-storage.jpg?s=2048x2048&w=is&k=20&c=0nk02sPEhDEYwOWLHpELRCmTpbKBCYmQqwEIuLDfTS0=",
+                  imageUrl: feedback.userAvatar,
                   width: 45,
                   height: 45,
                   fit: BoxFit.cover,
@@ -481,14 +608,14 @@ class _RecipePreviewState extends State<RecipePreview> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Hello word",
+                  Text(
+                    feedback.userName,
                     style: AppTextStyles.body,
                   ),
                   Row(
                     children: [
                       RatingStars(
-                        value: 3,
+                        value: feedback.rate,
                         onValueChanged: (v) {},
                         starCount: 5,
                         starSize: 18,
@@ -499,26 +626,40 @@ class _RecipePreviewState extends State<RecipePreview> {
                         starColor: Colors.yellow[700]!,
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        "5.0",
+                      Text(
+                        '${feedback.rate}',
                         style: AppTextStyles.body,
                       ),
                     ],
                   ),
                 ],
               ),
-              Spacer(),
+              const Spacer(),
               Text(
-                "1 day ago",
+                timeago.format(feedback.createdAt),
                 style: TextStyle(color: Colors.grey[800]),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          const ExpandableTextWidget(
-            text:
-                "This is a long text example to demonstrate the show more and show less functionality in Flutter. This feature is particularly useful for displaying large blocks of text in a limited space. Tap on 'Show more' to see the full content.",
+          ExpandableTextWidget(
+            text: feedback.feedback,
           ),
+          const SizedBox(height: 20),
+          feedback.imgUrl != ''
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: CachedNetworkImage(
+                    imageUrl: feedback.imgUrl,
+                    fit: BoxFit.cover,
+                    progressIndicatorBuilder: (context, url, progress) =>
+                        const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2)),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                  ),
+                )
+              : Container(),
         ],
       ),
     );
@@ -535,6 +676,73 @@ class _RecipePreviewState extends State<RecipePreview> {
       }
     } else {
       return '${mins}m';
+    }
+  }
+
+  void _showUploadPicDialog(BuildContext context, double width) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.info,
+      animType: AnimType.rightSlide,
+      title: 'Dialog Title',
+      desc: 'Upload recipe picture',
+      // btnCancelOnPress: () {},
+      // btnOkOnPress: () {},
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Upload recipe picture',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 30),
+          GestureDetector(
+            onTap: () {
+              getPhoto(true);
+            },
+            child: Container(
+                width: width * 0.5,
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: const Center(
+                  child: Text("Take a photo",
+                      style: TextStyle(color: Colors.black)),
+                )),
+          ),
+          const Divider(color: Colors.black, thickness: 0.2),
+          GestureDetector(
+            onTap: () {
+              getPhoto(false);
+            },
+            child: Container(
+                width: width * 0.5,
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: const Center(
+                  child: Text("Choose a photo",
+                      style: TextStyle(color: Colors.black)),
+                )),
+          ),
+        ],
+      ),
+    ).show();
+  }
+
+  Future<void> getPhoto(bool isFromCamera) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+          source: isFromCamera ? ImageSource.camera : ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+        Get.back();
+      }
+    } catch (e) {
+      print("Error capturing photo: $e");
     }
   }
 }
