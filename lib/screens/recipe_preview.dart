@@ -209,6 +209,10 @@ class _RecipePreviewState extends State<RecipePreview> {
     }
     double averageRating = totalRating / count;
 
+    setState(() {
+      widget.recipe.rateReviews = averageRating;
+    });
+
     List<double> ratingDistribution = List.filled(5, 0.0);
     for (var review in reviews!) {
       if (review.rate >= 1 && review.rate <= 5) {
